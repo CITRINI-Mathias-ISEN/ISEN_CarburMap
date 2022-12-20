@@ -3,15 +3,15 @@ package org.isen.carburmap.data
 import com.github.kittinunf.fuel.core.ResponseDeserializable
 import com.google.gson.Gson
 
-data class StationStatus (val data:DataStationStatus, val lastUpdatedOther:Long, val ttl:Int) {
-    class Deserializer : ResponseDeserializable<StationStatus> {
-        override fun deserialize(content: String): StationStatus = Gson().fromJson(content, StationStatus::class.java)
+data class Station(val records:List<Record>) {
+    class Deserializer : ResponseDeserializable<Station> {
+        override fun deserialize(content: String): Station = Gson().fromJson(content, Station::class.java)
     }
 }
 
-data class DataStationStatus(val stations:List<StationDescription>)
+data class Record(val fields:Fields)
 
-data class StationDescription(
+data class Fields(
     val price_e10: Double,
     val price_e85: Double,
     val price_sp98: Double,
@@ -36,7 +36,7 @@ data class StationDescription(
     val epci_name: String,
     val fuel:String,
     val shortage: String,
-    val geo_point: String,
+    val geo_point: Array<Double>,
     val dist: Double
 )
 
