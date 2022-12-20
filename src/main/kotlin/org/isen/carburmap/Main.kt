@@ -16,7 +16,7 @@ fun main() {
     frame.setSize(800, 600)
     frame.isVisible = true
     val marker = MapMarkerDot(48.8567, 2.3508)
-    marker.color = Color.RED;
+    marker.color = Color.RED
     marker.name = "Paris"
     map.addMapMarker(marker)
     val model = DefaultCarburmapModel()

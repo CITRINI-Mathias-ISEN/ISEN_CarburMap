@@ -12,12 +12,12 @@ data class Station(val records:List<Record>) {
 data class Record(val fields:Fields)
 
 data class Fields(
-    val price_e10: Double,
-    val price_e85: Double,
-    val price_sp98: Double,
-    val price_gazole: Double,
-    val price_sp95: Double,
-    val price_gplc: Double,
+    val price_e10: Double?,
+    val price_e85: Double?,
+    val price_sp98: Double?,
+    val price_gazole: Double?,
+    val price_sp95: Double?,
+    val price_gplc: Double?,
     val update: String,
     val cp: String,
     val services: String,

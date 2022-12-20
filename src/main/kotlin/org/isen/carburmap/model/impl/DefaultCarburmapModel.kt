@@ -27,7 +27,7 @@ class DefaultCarburmapModel : ICarburMapModel {
                 val (data, error) = result
                 if (data != null) {
                     station = data
-                    println(station!!.records[0].fields.name)
+                    println(station!!.records[0].fields)
                 } else {
                     logger.warn("Be careful data is void $error")
                 }
