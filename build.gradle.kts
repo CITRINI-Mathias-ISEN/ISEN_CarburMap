@@ -15,7 +15,7 @@ repositories {
 dependencies {
     //Kotlin
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk18")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.7.22")
     implementation("com.google.guava:guava:31.0.1-jre")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.20")
 
