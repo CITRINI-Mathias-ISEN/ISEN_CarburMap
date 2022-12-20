@@ -10,9 +10,15 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    maven("https://josm.openstreetmap.de/nexus/content/repositories/releases/")
 }
 
 dependencies {
+
+    //map
+
+    implementation("org.openstreetmap.jmapviewer:jmapviewer:2.16")
+
     //Kotlin
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.7.22")
@@ -31,6 +37,10 @@ dependencies {
 
     // GSON API
     implementation("com.google.code.gson:gson:2.10")
+
+
+
+
 }
 
 tasks.test {
