@@ -1,12 +1,19 @@
+package org.isen.carburmap
+
+import com.github.kittinunf.fuel.core.FuelManager
 import org.openstreetmap.gui.jmapviewer.JMapViewer
 import org.openstreetmap.gui.jmapviewer.MapMarkerDot
 import org.isen.carburmap.model.impl.DefaultCarburmapModel
 import org.isen.carburmap.model.ICarburMapModel
 import org.isen.carburmap.ctrl.CarburMapController
 import java.awt.*
+import java.security.KeyStore
+import java.security.cert.Certificate
+import java.security.cert.CertificateFactory
 import javax.swing.*
 
 fun main() {
+    customKeyStore()
     val frame = JFrame("Carte interactive mieux que Fressel")
     frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
     val map = JMapViewer()
@@ -21,4 +28,12 @@ fun main() {
     map.addMapMarker(marker)
     val model = DefaultCarburmapModel()
     model.findStation(43.432324, 6.800976, 1000)
+}
+
+fun customKeyStore() {
+    val certFile : Certificate = ClassLoader.getSystemClassLoader().getResource("data.economie.gouv.fr.crt")?.let { CertificateFactory.getInstance("X.509").generateCertificate(it.openStream()) }!!
+    val keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
+    keyStore.load(null, null)
+    keyStore.setCertificateEntry("data.economie.gouv.fr", certFile)
+    FuelManager.instance.keystore = keyStore
 }
