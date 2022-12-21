@@ -14,9 +14,7 @@ repositories {
 }
 
 dependencies {
-
     //map
-
     implementation("org.openstreetmap.jmapviewer:jmapviewer:2.16")
 
     //Kotlin
@@ -37,10 +35,6 @@ dependencies {
 
     // GSON API
     implementation("com.google.code.gson:gson:2.10")
-
-
-
-
 }
 
 tasks.test {
