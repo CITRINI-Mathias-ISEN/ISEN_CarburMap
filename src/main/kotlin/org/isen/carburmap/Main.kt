@@ -28,7 +28,7 @@ fun main() {
     val model = DefaultCarburmapModel()
     model.findStationByJSON(48.712, 2.371, 5000)
 
-    model.register("stationsList", MarkerManager(map))
+    model.register("stationsList", MarkerManager(map, Thread.currentThread()))
 }
 
 fun customKeyStore() {
