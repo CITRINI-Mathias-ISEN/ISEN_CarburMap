@@ -1,5 +1,10 @@
 package org.isen.carburmap.data
 
+import com.github.kittinunf.fuel.core.ResponseDeserializable
+import com.google.gson.Gson
+import com.google.gson.JsonParser
+import com.google.gson.annotations.SerializedName
+
 public class StationsList {
     public val stations : ArrayList<Station> = ArrayList<Station>()
 
@@ -21,6 +26,11 @@ public class StationsList {
                 this.stations.add(Station(id, cp, adresse, ville, automate_24_24, surRoute, coordonnees))
                 station = this.stations.find { it.id == record.fields.id }!!
                 station.services = services
+                // Transform the string horaires into a JSON object
+                val gson = Gson()
+                // Deserialize the JSON object into a Planning object
+                val planning = gson.fromJson(record.fields.horaires, Planning::class.java)
+                station.horaires = planning
             }
             station.prix?.add(Prix(record.fields.prix_nom, record.fields.prix_valeur, record.fields.prix_maj))
         }
@@ -36,8 +46,8 @@ data class Station(
     val surRoute: Boolean,
     val coordonnees: Array<Double>,
     var prix: ArrayList<Prix> ? = ArrayList<Prix>(),
-    var services: ArrayList<String> ? = ArrayList<String>()
-    //val horaires: String,
+    var services: ArrayList<String> ? = ArrayList<String>(),
+    var horaires: Planning ? = null
 )
 
 data class Prix(
@@ -45,3 +55,23 @@ data class Prix(
     val valeur: Double,
     val maj: String
 )
+
+data class Planning(val jour: List<Jour>) {
+
+    class Deserializer : ResponseDeserializable<Planning> {
+        override fun deserialize(content: String): Planning = Gson().fromJson(content, Planning::class.java)
+    }
+}
+
+data class Jour(
+    @SerializedName("@id")
+    val id: Int,
+    @SerializedName("@nom")
+    val nom: String,
+    val horaire: Horaire)
+
+data class Horaire(
+    @SerializedName("@ouverture")
+    val ouverture: String,
+    @SerializedName("@fermeture")
+    val fermeture: String)

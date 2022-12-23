@@ -2,6 +2,7 @@ package org.isen.carburmap.data
 
 import com.github.kittinunf.fuel.core.ResponseDeserializable
 import com.google.gson.Gson
+import com.google.gson.JsonElement
 
 data class StationsListJSON(val records:List<Record>) {
     class Deserializer : ResponseDeserializable<StationsListJSON> {

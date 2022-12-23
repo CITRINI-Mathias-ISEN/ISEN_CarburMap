@@ -29,6 +29,7 @@ class DefaultCarburmapModel : ICarburMapModel {
                     stationsList = StationsList(data!!)
                     println(stationsList!!.stations[0].prix)
                     println(stationsList!!.stations[0].services)
+                    println(stationsList!!.stations[0].horaires)
                 } else {
                     println(error)
                     logger.warn("Be careful data is void $error")
