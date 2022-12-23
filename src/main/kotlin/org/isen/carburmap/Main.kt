@@ -27,7 +27,7 @@ fun main() {
     marker.name = "Paris"
     map.addMapMarker(marker)
     val model = DefaultCarburmapModel()
-    model.findStation(43.432324, 6.800976, 1000)
+    model.findStationByJSON(43.432324, 6.800976, 1000)
 }
 
 fun customKeyStore() {
