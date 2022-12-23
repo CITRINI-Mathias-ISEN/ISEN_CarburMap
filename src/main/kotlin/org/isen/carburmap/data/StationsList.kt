@@ -1,36 +1,47 @@
 package org.isen.carburmap.data
 
-import com.github.kittinunf.fuel.core.ResponseDeserializable
-import com.google.gson.Gson
+public class StationsList {
+    public val stations : ArrayList<Station> = ArrayList<Station>()
 
-data class StationsList(val records:List<Record>) {
-    class Deserializer : ResponseDeserializable<StationsList> {
-        override fun deserialize(content: String): StationsList = Gson().fromJson(content, StationsList::class.java)
+    constructor(stations : StationsListJSON) {
+        for (record in stations.records) {
+            var station : Station? = this.stations.find { it.id == record.fields.id }
+            // Check if the station is already in the list
+            if ( station == null) {
+                val id = record.fields.id
+                val cp = record.fields.cp
+                val adresse = record.fields.adresse
+                val ville = record.fields.com_arm_name
+                val automate_24_24 = record.fields.horaires_automate_24_24 == "OUI"
+                val surRoute = record.fields.services_service == "R"
+                val coordonnees = record.fields.geom
+                val services = ArrayList<String>()
+                // Split the services string with the separator "//"
+                record.fields.services_service.split("//").forEach { services.add(it) }
+                this.stations.add(Station(id, cp, adresse, ville, automate_24_24, surRoute, coordonnees))
+                station = this.stations.find { it.id == record.fields.id }!!
+                station.services = services
+            }
+            station.prix?.add(Prix(record.fields.prix_nom, record.fields.prix_valeur, record.fields.prix_maj))
+        }
     }
 }
 
-data class Record(val fields:Fields)
-
-data class Fields(
-    val prix_valeur:Double,
-    val prix_maj: String,
-    val cp: String,
-    val services_service: String,
-    val horaires: String,
-    val com_code: Int,
+data class Station(
     val id: Long,
-    val com_arm_name: String,
+    val cp: String,
     val adresse: String,
-    val horaires_automate_24_24: String,
-    val pop: String,
-    val epci_code: Long,
-    val reg_name: String,
-    val brand: String,
-    val dep_name: String,
-    val epci_name: String,
-    val prix_nom:String,
-    val geom: Array<Double>,
-    val dist: Double
+    val ville: String,
+    val automate_24_24: Boolean,
+    val surRoute: Boolean,
+    val coordonnees: Array<Double>,
+    var prix: ArrayList<Prix> ? = ArrayList<Prix>(),
+    var services: ArrayList<String> ? = ArrayList<String>()
+    //val horaires: String,
 )
 
-
+data class Prix(
+    val carburant: String,
+    val valeur: Double,
+    val maj: String
+)

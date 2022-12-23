@@ -2,7 +2,7 @@ package org.isen.carburmap.model.impl
 
 import com.github.kittinunf.fuel.httpGet
 import org.apache.logging.log4j.kotlin.Logging
-import org.isen.carburmap.data.StationsList
+import org.isen.carburmap.data.*
 import org.isen.carburmap.model.ICarburMapModel
 import java.beans.PropertyChangeListener
 import java.beans.PropertyChangeSupport
@@ -14,20 +14,21 @@ class DefaultCarburmapModel : ICarburMapModel {
 
     private val pcs = PropertyChangeSupport(this)
 
-    private var stationsList: StationsList? by Delegates.observable(null) {
+    private var stationsList : StationsList? by Delegates.observable(null) {
             _, oldValue, newValue ->
         logger.info("stationInformation updated")
-        //pcs.firePropertyChange(IMyVelibModel.DATATYPE_VELIB, oldValue, newValue)
+        //pcs.firePropertyChange(ICarburMapModel.DATATYPE_STATIONS, oldValue, newValue)
     }
 
     override fun findStationByJSON(x:Double, y:Double, radius:Long) {
             "https://data.economie.gouv.fr//api/records/1.0/search/?dataset=prix-carburants-fichier-instantane-test-ods-copie&q=&rows=-1&geofilter.distance=$x%2C+$y%2C+$radius"
             .httpGet()
-            .responseObject(StationsList.Deserializer()) { request, response, result ->
+            .responseObject(StationsListJSON.Deserializer()) { request, response, result ->
                 val (data, error) = result
                 if (data != null) {
-                    stationsList = data
-                    println(stationsList!!.records[0].fields)
+                    stationsList = StationsList(data!!)
+                    println(stationsList!!.stations[0].prix)
+                    println(stationsList!!.stations[0].services)
                 } else {
                     println(error)
                     logger.warn("Be careful data is void $error")
