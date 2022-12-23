@@ -6,10 +6,10 @@ import org.openstreetmap.gui.jmapviewer.JMapViewer
 import java.beans.PropertyChangeEvent
 import java.beans.PropertyChangeListener
 
-class MarkerManager(var map: JMapViewer, private val mainThread: Thread) : PropertyChangeListener {
+class MarkerManager(var map: JMapViewer) : PropertyChangeListener {
     override fun propertyChange(evt: PropertyChangeEvent?) {
         if(evt == null || evt.newValue !is StationsList) return
-        mainThread.run {
+        synchronized(map){
             (evt.newValue as StationsList).stations.forEach {
                 val coordinate = Coordinate(it.coordonnees[0], it.coordonnees[1])
                 val markerIcon = MapMarkerIcon(coordinate, "./img/gas-station.png")
