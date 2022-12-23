@@ -16,7 +16,7 @@ data class Fields(
     val prix_valeur:Double,
     val prix_maj: String,
     val cp: String,
-    val services_service: String,
+    val services_service: String?,
     val horaires: String,
     val com_code: Int,
     val id: Long,

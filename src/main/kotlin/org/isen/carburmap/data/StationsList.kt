@@ -22,14 +22,18 @@ public class StationsList {
                 val coordonnees = record.fields.geom
                 val services = ArrayList<String>()
                 // Split the services string with the separator "//"
-                record.fields.services_service.split("//").forEach { services.add(it) }
+                record.fields.services_service?.split("//")?.forEach { services.add(it) }
                 this.stations.add(Station(id, cp, adresse, ville, automate_24_24, surRoute, coordonnees))
                 station = this.stations.find { it.id == record.fields.id }!!
                 station.services = services
                 // Transform the string horaires into a JSON object
                 val gson = Gson()
                 // Deserialize the JSON object into a Planning object
-                val planning = gson.fromJson(record.fields.horaires, Planning::class.java)
+                val planning: Planning = try {
+                    gson.fromJson(record.fields.horaires, Planning::class.java)
+                } catch (e: Exception) {
+                    Planning(arrayListOf())
+                }
                 station.horaires = planning
             }
             station.prix?.add(Prix(record.fields.prix_nom, record.fields.prix_valeur, record.fields.prix_maj))
