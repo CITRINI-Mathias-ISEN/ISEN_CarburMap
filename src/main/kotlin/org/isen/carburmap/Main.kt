@@ -6,6 +6,9 @@ import org.openstreetmap.gui.jmapviewer.MapMarkerDot
 import org.isen.carburmap.model.impl.DefaultCarburmapModel
 import org.isen.carburmap.model.ICarburMapModel
 import org.isen.carburmap.ctrl.CarburMapController
+import org.isen.carburmap.lib.marker.MapMarkerIcon
+import org.isen.carburmap.lib.marker.MarkerManager
+import org.openstreetmap.gui.jmapviewer.Coordinate
 import java.awt.*
 import java.security.KeyStore
 import java.security.cert.Certificate
@@ -22,12 +25,10 @@ fun main() {
     frame.add(panel)
     frame.setSize(800, 600)
     frame.isVisible = true
-    val marker = MapMarkerDot(48.8567, 2.3508)
-    marker.color = Color.RED
-    marker.name = "Paris"
-    map.addMapMarker(marker)
     val model = DefaultCarburmapModel()
-    model.findStationByJSON(48.712, 2.371, 1000)
+    model.findStationByJSON(48.712, 2.371, 5000)
+
+    model.register("stationsList", MarkerManager(map))
 }
 
 fun customKeyStore() {

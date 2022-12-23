@@ -17,7 +17,7 @@ class DefaultCarburmapModel : ICarburMapModel {
     private var stationsList : StationsList? by Delegates.observable(null) {
             _, oldValue, newValue ->
         logger.info("stationInformation updated")
-        //pcs.firePropertyChange(ICarburMapModel.DATATYPE_STATIONS, oldValue, newValue)
+        pcs.firePropertyChange("stationsList", oldValue, newValue)
     }
 
     override fun findStationByJSON(x:Double, y:Double, radius:Long) {
@@ -44,7 +44,7 @@ class DefaultCarburmapModel : ICarburMapModel {
     }
 
     override fun register(datatype:String?, listener:PropertyChangeListener){
-        //TODO
+        pcs.addPropertyChangeListener(datatype, listener)
     }
     override fun unregister(listener:PropertyChangeListener){
         //TODO
