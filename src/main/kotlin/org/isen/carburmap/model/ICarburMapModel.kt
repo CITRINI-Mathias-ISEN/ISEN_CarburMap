@@ -9,4 +9,5 @@ interface ICarburMapModel {
 
     fun findStationByXML(x:Double, y:Double, radius:Long)
     fun changeCurrentSelection(id:Long)
+    fun fetchAllCities()
 }

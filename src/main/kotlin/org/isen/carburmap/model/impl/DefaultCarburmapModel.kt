@@ -1,11 +1,18 @@
 package org.isen.carburmap.model.impl
 
 import com.github.kittinunf.fuel.httpGet
+import com.google.gson.Gson
 import org.apache.logging.log4j.kotlin.Logging
 import org.isen.carburmap.data.*
 import org.isen.carburmap.model.ICarburMapModel
 import java.beans.PropertyChangeListener
 import java.beans.PropertyChangeSupport
+import java.io.File
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 import kotlin.properties.Delegates
 
 class DefaultCarburmapModel : ICarburMapModel {
@@ -18,6 +25,12 @@ class DefaultCarburmapModel : ICarburMapModel {
             _, oldValue, newValue ->
         logger.info("stationInformation updated")
         pcs.firePropertyChange("stationsList", oldValue, newValue)
+    }
+
+    private var villesList : Array<Field>? by Delegates.observable(null) {
+            _, oldValue, newValue ->
+        logger.info("stationInformation updated")
+        pcs.firePropertyChange("villesList", oldValue, newValue)
     }
 
     override fun findStationByJSON(x:Double, y:Double, radius:Long) {
@@ -41,6 +54,15 @@ class DefaultCarburmapModel : ICarburMapModel {
         // Get the file from resources folder
         val file = ClassLoader.getSystemClassLoader().getResource("./PrixCarburants_instantane.xml")
         val xml = file.readText()
+    }
+
+    override fun fetchAllCities(){
+
+        val content = ClassLoader.getSystemClassLoader().getResource("./cities.json")?.readText(Charsets.UTF_8)
+
+        val gson = Gson()
+        villesList = gson.fromJson(content, Array<Field>::class.java)
+        println(villesList!![0].name)
     }
 
     override fun register(datatype:String?, listener:PropertyChangeListener){

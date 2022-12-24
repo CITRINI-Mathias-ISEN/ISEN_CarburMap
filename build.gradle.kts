@@ -38,7 +38,7 @@ dependencies {
 
     // XML Jackson API
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.13.0")
-
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
 }
 
 tasks.test {

@@ -26,6 +26,7 @@ fun main() {
     frame.setSize(800, 600)
     frame.isVisible = true
     val model = DefaultCarburmapModel()
+    model.fetchAllCities()
     model.findStationByJSON(48.712, 2.371, 5000)
 
     model.register("stationsList", MarkerManager(map))
