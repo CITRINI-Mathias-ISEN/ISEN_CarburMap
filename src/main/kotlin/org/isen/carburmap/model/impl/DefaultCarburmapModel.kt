@@ -1,11 +1,18 @@
 package org.isen.carburmap.model.impl
 
 import com.github.kittinunf.fuel.httpGet
+import com.google.gson.Gson
 import org.apache.logging.log4j.kotlin.Logging
-import org.isen.carburmap.data.Station
+import org.isen.carburmap.data.*
 import org.isen.carburmap.model.ICarburMapModel
 import java.beans.PropertyChangeListener
 import java.beans.PropertyChangeSupport
+import java.io.File
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 import kotlin.properties.Delegates
 
 class DefaultCarburmapModel : ICarburMapModel {
@@ -14,28 +21,52 @@ class DefaultCarburmapModel : ICarburMapModel {
 
     private val pcs = PropertyChangeSupport(this)
 
-    private var station: Station? by Delegates.observable(null) {
+    private var stationsList : StationsList? by Delegates.observable(null) {
             _, oldValue, newValue ->
         logger.info("stationInformation updated")
-        //pcs.firePropertyChange(IMyVelibModel.DATATYPE_VELIB, oldValue, newValue)
+        pcs.firePropertyChange("stationsList", oldValue, newValue)
     }
 
-    override fun findStation(x:Double, y:Double, radius:Long) {
-            "https://public.opendatasoft.com/api/records/1.0/search/?dataset=prix-des-carburants-j-1&q=&rows=1&geofilter.distance=$x%2C+$y%2C+$radius"
+    private var villesList : Array<Field>? by Delegates.observable(null) {
+            _, oldValue, newValue ->
+        logger.info("stationInformation updated")
+        pcs.firePropertyChange("villesList", oldValue, newValue)
+    }
+
+    override fun findStationByJSON(x:Double, y:Double, radius:Long) {
+            "https://data.economie.gouv.fr//api/records/1.0/search/?dataset=prix-carburants-fichier-instantane-test-ods-copie&q=&rows=-1&geofilter.distance=$x%2C+$y%2C+$radius"
             .httpGet()
-            .responseObject(Station.Deserializer()) { request, response, result ->
+            .responseObject(StationsListJSON.Deserializer()) { request, response, result ->
                 val (data, error) = result
                 if (data != null) {
-                    station = data
-                    println(station!!.records[0].fields.name)
+                    stationsList = StationsList(data!!)
+                    println(stationsList!!.stations[0].prix)
+                    println(stationsList!!.stations[0].services)
+                    println(stationsList!!.stations[0].horaires)
                 } else {
+                    println(error)
                     logger.warn("Be careful data is void $error")
                 }
             }
     }
 
+    override fun findStationByXML(x:Double, y:Double, radius:Long) {
+        // Get the file from resources folder
+        val file = ClassLoader.getSystemClassLoader().getResource("./PrixCarburants_instantane.xml")
+        val xml = file.readText()
+    }
+
+    override fun fetchAllCities(){
+
+        val content = ClassLoader.getSystemClassLoader().getResource("./cities.json")?.readText(Charsets.UTF_8)
+
+        val gson = Gson()
+        villesList = gson.fromJson(content, Array<Field>::class.java)
+        println(villesList!![0].name)
+    }
+
     override fun register(datatype:String?, listener:PropertyChangeListener){
-        //TODO
+        pcs.addPropertyChangeListener(datatype, listener)
     }
     override fun unregister(listener:PropertyChangeListener){
         //TODO

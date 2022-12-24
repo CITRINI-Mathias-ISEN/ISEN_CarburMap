@@ -14,9 +14,7 @@ repositories {
 }
 
 dependencies {
-
     //map
-
     implementation("org.openstreetmap.jmapviewer:jmapviewer:2.16")
 
     //Kotlin
@@ -38,9 +36,9 @@ dependencies {
     // GSON API
     implementation("com.google.code.gson:gson:2.10")
 
-
-
-
+    // XML Jackson API
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.13.0")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
 }
 
 tasks.test {
