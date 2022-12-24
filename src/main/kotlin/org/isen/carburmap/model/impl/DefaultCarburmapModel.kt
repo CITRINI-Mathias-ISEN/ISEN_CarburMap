@@ -7,12 +7,6 @@ import org.isen.carburmap.data.*
 import org.isen.carburmap.model.ICarburMapModel
 import java.beans.PropertyChangeListener
 import java.beans.PropertyChangeSupport
-import java.io.File
-import java.nio.charset.Charset
-import java.nio.charset.StandardCharsets
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
 import kotlin.properties.Delegates
 
 class DefaultCarburmapModel : ICarburMapModel {
@@ -56,13 +50,15 @@ class DefaultCarburmapModel : ICarburMapModel {
         val xml = file.readText()
     }
 
-    override fun fetchAllCities(){
+    override fun fetchAllCities() : Array<Field>? {
 
         val content = ClassLoader.getSystemClassLoader().getResource("./cities.json")?.readText(Charsets.UTF_8)
 
         val gson = Gson()
         villesList = gson.fromJson(content, Array<Field>::class.java)
         println(villesList!![0].name)
+        return villesList!!
+
     }
 
     override fun register(datatype:String?, listener:PropertyChangeListener){
