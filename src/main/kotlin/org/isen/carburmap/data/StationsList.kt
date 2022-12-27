@@ -2,8 +2,8 @@ package org.isen.carburmap.data
 
 import com.github.kittinunf.fuel.core.ResponseDeserializable
 import com.google.gson.Gson
-import com.google.gson.JsonParser
 import com.google.gson.annotations.SerializedName
+import org.isen.carburmap.data.json.StationsListJSON
 import org.isen.carburmap.data.xml.StationsListXML
 
 public class StationsList {
@@ -12,7 +12,6 @@ public class StationsList {
     constructor(stations : StationsListJSON) {
         for (record in stations.records) {
             var station : Station? = this.stations.find { it.id == record.fields.id }
-            // Check if the station is already in the list
             if ( station == null) {
                 val id = record.fields.id
                 val cp = record.fields.cp
@@ -22,14 +21,11 @@ public class StationsList {
                 val surRoute = record.fields.services_service == "R"
                 val coordonnees = record.fields.geom
                 val services = ArrayList<String>()
-                // Split the services string with the separator "//"
                 record.fields.services_service?.split("//")?.forEach { services.add(it) }
                 var station : Station = Station(id, cp, adresse, ville, automate_24_24, surRoute, coordonnees)
                 this.stations.add(station)
                 station.services = services
-                // Transform the string horaires into a JSON object
                 val gson = Gson()
-                // Deserialize the JSON object into a Planning object
                 val planning: Planning = try {
                     gson.fromJson(record.fields.horaires, Planning::class.java)
                 } catch (e: Exception) {
@@ -38,7 +34,9 @@ public class StationsList {
                 station.horaires = planning
             }
             if (station != null) {
-                station.prix?.add(Prix(record.fields.prix_nom, record.fields.prix_valeur, record.fields.prix_maj))
+                if (station.prix?.find { it.carburant == record.fields.prix_nom } == null) {
+                    station.prix?.add(Prix(record.fields.prix_nom, record.fields.prix_valeur, record.fields.prix_maj))
+                }
             }
         }
     }
@@ -66,7 +64,9 @@ public class StationsList {
                     }
                 }
                 for (prix in pdv.prix) {
-                    station.prix?.add(Prix(prix.carburant, prix.valeur, prix.maj))
+                    if (station.prix?.find { it.carburant == prix.carburant } == null) {
+                        station.prix?.add(Prix(prix.carburant, prix.valeur, prix.maj))
+                    }
                 }
             }
         }
