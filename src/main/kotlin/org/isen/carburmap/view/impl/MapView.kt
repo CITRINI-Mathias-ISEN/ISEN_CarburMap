@@ -2,6 +2,7 @@ package org.isen.carburmap.view.impl
 
 import org.apache.logging.log4j.kotlin.Logging
 import org.isen.carburmap.ctrl.CarburMapController
+import org.isen.carburmap.data.Prix
 import org.isen.carburmap.data.StationsList
 import org.isen.carburmap.lib.marker.MapMarkerStation
 import org.isen.carburmap.model.ICarburMapModel
@@ -40,7 +41,7 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
         contentPane = this@MapView
         defaultCloseOperation = JFrame.EXIT_ON_CLOSE
         this.title = "CarburMap"
-        this.preferredSize = Dimension(700,500)
+        this.preferredSize = Dimension(900,600)
         this.pack()
     }
 
@@ -49,8 +50,7 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
         val jSplitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, createStationListPanel(), createStationMapPanel())
         jSplitPane.minimumSize = Dimension(100, 100)
         this.add(jSplitPane, BorderLayout.CENTER)
-
-        frame.setSize(800, 600)
+        frame.setSize(1080, 720)
         frame.isVisible = true
         map.addMouseListener(this)
     }
@@ -119,27 +119,40 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
     private class ListStationListCellRenderer(val controller: CarburMapController) : ListCellRenderer<MapMarkerStation> {
         private val renderer = JPanel(BorderLayout())
         private val icon = JLabel(null as? Icon?, SwingConstants.CENTER)
-        private val label = JLabel("", SwingConstants.CENTER)
-        private val focusBorder = UIManager.getBorder("List.focusCellHighlightBorder")
+        private val focusBorder = UIManager.getBorder("Panel.focusCellHighlightBorder") ?: BorderFactory.createEmptyBorder(1, 1, 1, 1)
         private val noFocusBorder = UIManager.getBorder("List.noFocusBorder") ?: getSynthNoFocusBorder()
         private var fieldComp : HashMap<String, JLabel> = HashMap()
+        private val box: Box = Box.createVerticalBox()
+        private val prixList: JList<Prix> = object : JList<Prix>() {
+            override fun updateUI() {
+                selectionForeground = null // Nimbus
+                selectionBackground = null // Nimbus
+                cellRenderer = null
+                super.updateUI()
+                layoutOrientation = JList.HORIZONTAL_WRAP
+                visibleRowCount = 0
+                border = BorderFactory.createEmptyBorder(5, 10, 5, 10)
+                cellRenderer = PrixListCellRenderer()
+                selectionModel.selectionMode = ListSelectionModel.MULTIPLE_INTERVAL_SELECTION
+            }
+        }
 
         init {
             icon.isOpaque = false
             icon.maximumSize = Dimension(32, 32)
-            label.foreground = renderer.foreground
-            label.background = renderer.background
-            label.border = noFocusBorder
-            renderer.isOpaque = false
+            renderer.border = noFocusBorder
+            renderer.isOpaque = true
             renderer.border = BorderFactory.createEmptyBorder(2, 2, 2, 2)
             renderer.add(icon, BorderLayout.WEST)
-            renderer.add(label, BorderLayout.SOUTH)
-            val box = Box.createVerticalBox()
+            val globalBox: Box = Box.createVerticalBox()
             box.add(makeGridBagLayoutPanel("address","Addresse :" , JLabel("")))
             box.add(makeGridBagLayoutPanel("city","Ville :" , JLabel("")))
             box.add(makeGridBagLayoutPanel("cp","Code postal :" , JLabel("")))
-
-            renderer.add(box, BorderLayout.CENTER)
+            val listPanel = JPanel(BorderLayout())
+            listPanel.add(prixList, BorderLayout.CENTER)
+            globalBox.add(box)
+            globalBox.add(listPanel)
+            renderer.add(globalBox, BorderLayout.CENTER)
         }
 
         fun makeGridBagLayoutPanel(atrName : String, label: String, comp: JLabel): Component {
@@ -160,7 +173,7 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
         }
 
         private fun getSynthNoFocusBorder(): Border {
-            val i = focusBorder.getBorderInsets(label)
+            val i = focusBorder.getBorderInsets(renderer)
             return BorderFactory.createEmptyBorder(i.top, i.left, i.bottom, i.right)
         }
 
@@ -172,29 +185,63 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
             cellHasFocus: Boolean
         ): Component {
             if (value != null) {
-                label.text = value.station.id.toString()
-                label.border = if (cellHasFocus) focusBorder else noFocusBorder
+                renderer.border = if (cellHasFocus) focusBorder else noFocusBorder
                 if (isSelected) {
                     icon.icon = ImageIcon(value.selectedIcon.image)
-                    label.foreground = list.selectionForeground
-                    label.background = list.selectionBackground
-                    label.isOpaque = true
+                    renderer.foreground = list.selectionForeground
+                    renderer.background = list.selectionBackground
+                    renderer.isOpaque = true
                     if (controller.model is DefaultCarburmapModel) {
                         controller.model.selectedMapMarkerStation = value
                     }
 
                 } else {
                     icon.icon = ImageIcon(value.img.image)
-                    label.foreground = list.foreground
-                    label.background = list.background
-                    label.isOpaque = false
+                    renderer.foreground = list.foreground
+                    renderer.background = list.background
+                    renderer.isOpaque = false
                 }
                 fieldComp["address"]?.text = value.station.adresse
                 fieldComp["city"]?.text = value.station.ville
                 fieldComp["cp"]?.text = value.station.cp
+                prixList.model = DefaultListModel<Prix>().apply {
+                    value.station.prix?.forEach { prix ->
+                        addElement(prix)
+                    }
+                }
             }
             return renderer
         }
+    }
+
+    class PrixListCellRenderer : ListCellRenderer<Prix> {
+        private val renderer = JPanel(BorderLayout())
+        private val label = JLabel("", SwingConstants.CENTER)
+        private val focusBorder = UIManager.getBorder("List.focusCellHighlightBorder")
+        private val noFocusBorder = UIManager.getBorder("List.noFocusBorder")
+
+        init {
+            label.foreground = renderer.foreground
+            label.background = renderer.background
+            label.isOpaque = false
+            label.border = noFocusBorder
+            renderer.isOpaque = false
+            renderer.border = BorderFactory.createEmptyBorder(2, 2, 2, 2)
+            renderer.add(label)
+        }
+
+        override fun getListCellRendererComponent(
+            list: JList<out Prix>?,
+            value: Prix?,
+            index: Int,
+            isSelected: Boolean,
+            cellHasFocus: Boolean
+        ): Component {
+            if (value == null) return renderer
+            label.text = "${value.carburant} : ${value.valeur}€"
+            return renderer
+        }
+
     }
 
     override fun mouseClicked(e: MouseEvent?) {
