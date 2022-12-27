@@ -86,12 +86,11 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
                     model.addElement(markerIcon)
                     println("Station at ${it.coordonnees[0]} ${it.coordonnees[1]}")
                 }
-                (evt.oldValue as StationsList).let { oldStations ->
-                    oldStations.stations.forEach { station ->
-                        val toRemove = map.mapMarkerList.filter { (it is MapMarkerStation) && (it.station == station) }
-                        map.mapMarkerList.removeAll(toRemove)
-                        toRemove.forEach(model::removeElement)
-                    }
+                if(evt.oldValue == null) return
+                (evt.oldValue as StationsList).stations.forEach { station ->
+                    val toRemove = map.mapMarkerList.filter { (it is MapMarkerStation) && (it.station == station) }
+                    map.mapMarkerList.removeAll(toRemove)
+                    toRemove.forEach(model::removeElement)
                 }
 
             }
