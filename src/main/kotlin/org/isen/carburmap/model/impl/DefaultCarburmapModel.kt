@@ -62,9 +62,6 @@ class DefaultCarburmapModel : ICarburMapModel {
                 val (data, error) = result
                 if (data != null) {
                     stationsList = StationsList(data)
-                    println(stationsList!!.stations[0].prix)
-                    println(stationsList!!.stations[0].services)
-                    println(stationsList!!.stations[0].horaires)
                 } else {
                     println(error)
                     logger.warn("Be careful data is void $error")
@@ -84,9 +81,13 @@ class DefaultCarburmapModel : ICarburMapModel {
         val file = ClassLoader.getSystemClassLoader().getResource("./PrixCarburants_instantane.xml")
         val xml = file.readText()
         var data = kotlinXmlMapper.readValue(xml, StationsListXML::class.java)
-        val geoDistanceHelper = GeoDistanceHelper(lat, lon)
-        data.pdv = data.pdv.filter{ geoDistanceHelper.calculate(it.latitude.toDouble() / 100000, it.longitude.toDouble() / 100000) < radius.toDouble() } as ArrayList<Pdv>
-        stationsList = StationsList(data)
+        if (data != null) {
+            val geoDistanceHelper = GeoDistanceHelper(lat, lon)
+            data.pdv = data.pdv.filter{ geoDistanceHelper.calculate(it.latitude.toDouble() / 100000, it.longitude.toDouble() / 100000) < radius.toDouble() } as ArrayList<Pdv>
+            stationsList = StationsList(data)
+        } else {
+            logger.warn("Be careful data is void")
+        }
     }
 
     override fun fetchAllCities() : Array<Field>? {
