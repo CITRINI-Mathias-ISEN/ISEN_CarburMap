@@ -11,7 +11,8 @@ class CarburMapController(val model:ICarburMapModel) {
             it.display()
         }
         model.fetchAllCities()
-        model.findStationByJSON(48.712, 2.371, 5000)
+        //model.findStationByJSON(48.712, 2.371, 5000)
+        model.findStationByXML(48.712, 2.371, 5000)
     }
 
     fun closeView(){
