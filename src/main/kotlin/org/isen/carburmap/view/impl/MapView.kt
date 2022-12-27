@@ -110,6 +110,7 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
                         map.removeMapMarker(it)
                         it.isSelected = true
                         map.addMapMarker(it)
+                        list.scrollRectToVisible(list.getCellBounds(model.indexOf(it), model.indexOf(it)))
                     }
                 }
             }
