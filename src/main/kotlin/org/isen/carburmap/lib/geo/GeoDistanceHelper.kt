@@ -1,3 +1,5 @@
+package org.isen.carburmap.lib.geo
+
 import kotlin.math.*
 
 class GeoDistanceHelper(val lat_a:Number, val lon_a:Number) {
