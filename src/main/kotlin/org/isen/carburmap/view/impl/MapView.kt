@@ -8,9 +8,7 @@ import org.isen.carburmap.model.ICarburMapModel
 import org.isen.carburmap.model.impl.DefaultCarburmapModel
 import org.isen.carburmap.view.ICarburMapView
 import org.openstreetmap.gui.jmapviewer.JMapViewer
-import java.awt.BorderLayout
-import java.awt.Component
-import java.awt.Dimension
+import java.awt.*
 import java.awt.event.MouseEvent
 import java.awt.event.MouseListener
 import java.beans.PropertyChangeEvent
@@ -29,10 +27,8 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
             selectionBackground = null // Nimbus
             cellRenderer = null
             super.updateUI()
-            layoutOrientation = HORIZONTAL_WRAP
+            layoutOrientation = VERTICAL
             visibleRowCount = 0
-            fixedCellWidth = 82
-            fixedCellHeight = 82
             border = BorderFactory.createEmptyBorder(5, 10, 5, 10)
             cellRenderer = ListStationListCellRenderer(controller)
             selectionModel.selectionMode = ListSelectionModel.MULTIPLE_INTERVAL_SELECTION
@@ -67,7 +63,6 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
         val scroll = JScrollPane(list)
         scroll.horizontalScrollBarPolicy = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
         scroll.verticalScrollBar.unitIncrement = 25
-
         return scroll
     }
 
@@ -91,6 +86,14 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
                     model.addElement(markerIcon)
                     println("Station at ${it.coordonnees[0]} ${it.coordonnees[1]}")
                 }
+                (evt.oldValue as StationsList).let { oldStations ->
+                    oldStations.stations.forEach { station ->
+                        val toRemove = map.mapMarkerList.filter { (it is MapMarkerStation) && (it.station == station) }
+                        map.mapMarkerList.removeAll(toRemove)
+                        toRemove.forEach(model::removeElement)
+                    }
+                }
+
             }
         }
         if (evt?.propertyName == ICarburMapModel.DataType.SelectedStation.toString()) {
@@ -120,16 +123,41 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
         private val label = JLabel("", SwingConstants.CENTER)
         private val focusBorder = UIManager.getBorder("List.focusCellHighlightBorder")
         private val noFocusBorder = UIManager.getBorder("List.noFocusBorder") ?: getSynthNoFocusBorder()
+        private var fieldComp : HashMap<String, JLabel> = HashMap()
 
         init {
             icon.isOpaque = false
+            icon.maximumSize = Dimension(32, 32)
             label.foreground = renderer.foreground
             label.background = renderer.background
             label.border = noFocusBorder
             renderer.isOpaque = false
             renderer.border = BorderFactory.createEmptyBorder(2, 2, 2, 2)
-            renderer.add(icon)
+            renderer.add(icon, BorderLayout.WEST)
             renderer.add(label, BorderLayout.SOUTH)
+            val box = Box.createVerticalBox()
+            box.add(makeGridBagLayoutPanel("address","Addresse :" , JLabel("")))
+            box.add(makeGridBagLayoutPanel("city","Ville :" , JLabel("")))
+            box.add(makeGridBagLayoutPanel("cp","Code postal :" , JLabel("")))
+
+            renderer.add(box, BorderLayout.CENTER)
+        }
+
+        fun makeGridBagLayoutPanel(atrName : String, label: String, comp: JLabel): Component {
+            val c = GridBagConstraints()
+            val panel = JPanel(GridBagLayout())
+            val GAP = 5
+            fieldComp[atrName] = comp
+
+            c.insets = Insets(GAP, GAP, GAP, 0)
+            c.anchor = GridBagConstraints.LINE_END
+            panel.add(JLabel(label), c)
+
+            c.weightx = 1.0
+            c.fill = GridBagConstraints.HORIZONTAL
+            panel.add(comp, c)
+
+            return panel
         }
 
         private fun getSynthNoFocusBorder(): Border {
@@ -162,6 +190,9 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
                     label.background = list.background
                     label.isOpaque = false
                 }
+                fieldComp["address"]?.text = value.station.adresse
+                fieldComp["city"]?.text = value.station.ville
+                fieldComp["cp"]?.text = value.station.cp
             }
             return renderer
         }
