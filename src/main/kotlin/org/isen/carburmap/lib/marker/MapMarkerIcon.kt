@@ -10,18 +10,15 @@ import java.awt.*
 import java.awt.geom.AffineTransform
 
 
-class MapMarkerIcon(var coord: Coordinate, private var imgPath : String = "./img/gas-station.png") : MapObjectImpl(null, null, null), MapMarker  {
-    private var img: Icon = IconManager.getInstance().getIcon(imgPath)
+open class MapMarkerIcon(var coord: Coordinate, imgPath : String = "./img/gas-station.png") : MapObjectImpl(null, null, null), MapMarker  {
+    var img: Icon = IconManager.getInstance().getIcon(imgPath)
+        private set
     private var rotation = 0.0
-    private var position: Point? = null
+    protected var position: Point? = null
+    protected var size: Dimension? = null
 
     override fun paint(g: Graphics, position: Point, radio: Int) {
-        var imgToDraw = img.image
-        if(radio < 1000) {
-            imgToDraw = img.smallImage
-        } else if(radio > 400000) {
-            imgToDraw = img.bigImage
-        }
+        val imgToDraw = imageToDraw(radio)
         val halfWidth = imgToDraw.getWidth(null) / 2
         val halfHeight = imgToDraw.getHeight(null) / 2
         if (g is Graphics2D) {
@@ -37,9 +34,27 @@ class MapMarkerIcon(var coord: Coordinate, private var imgPath : String = "./img
                 RenderingHints.VALUE_INTERPOLATION_BILINEAR
             )
             g.drawImage(imgToDraw, t, null)
+
         }
         if (layer == null || layer!!.isVisibleTexts) paintText(g, position)
         this.position = position
+        this.size = Dimension(imgToDraw.getWidth(null), imgToDraw.getHeight(null))
+        //verify if a point is inside the marker
+//val p = Point(0, 0)
+//if (p.x >= position.x - halfWidth && p.x <= position.x + halfWidth && p.y >= position.y - halfHeight && p.y <= position.y + halfHeight) {
+    }
+    open fun imageToDraw(radio: Int) : Image {
+        return getImageSizeToDraw(radio, img)
+    }
+
+    open fun getImageSizeToDraw(radio: Int, icon: Icon) : Image{
+        var imgToDraw = icon.image
+        if(radio < 1000) {
+            imgToDraw = icon.smallImage
+        } else if(radio > 400000) {
+            imgToDraw = icon.bigImage
+        }
+        return imgToDraw
     }
 
     override fun getCoordinate(): Coordinate {
