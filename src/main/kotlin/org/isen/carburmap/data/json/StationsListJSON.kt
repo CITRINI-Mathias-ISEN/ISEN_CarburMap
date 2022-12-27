@@ -1,8 +1,7 @@
-package org.isen.carburmap.data
+package org.isen.carburmap.data.json
 
 import com.github.kittinunf.fuel.core.ResponseDeserializable
 import com.google.gson.Gson
-import com.google.gson.JsonElement
 
 data class StationsListJSON(val records:List<Record>) {
     class Deserializer : ResponseDeserializable<StationsListJSON> {
@@ -10,7 +9,7 @@ data class StationsListJSON(val records:List<Record>) {
     }
 }
 
-data class Record(val fields:Fields)
+data class Record(val fields: Fields)
 
 data class Fields(
     val prix_valeur:Double,
