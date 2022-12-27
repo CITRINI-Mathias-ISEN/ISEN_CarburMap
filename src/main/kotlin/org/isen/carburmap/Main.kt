@@ -28,7 +28,6 @@ fun main() {
     val view = MapView(controller)
     controller.registerViewToCarburMapData(view)
     controller.displayViews()
-
 }
 
 fun customKeyStore() {
