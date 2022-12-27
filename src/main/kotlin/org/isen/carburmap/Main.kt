@@ -1,23 +1,16 @@
 package org.isen.carburmap
 
 import com.github.kittinunf.fuel.core.FuelManager
-import org.openstreetmap.gui.jmapviewer.JMapViewer
-import org.openstreetmap.gui.jmapviewer.MapMarkerDot
 import org.isen.carburmap.model.impl.DefaultCarburmapModel
-import org.isen.carburmap.model.ICarburMapModel
 import org.isen.carburmap.ctrl.CarburMapController
-import org.isen.carburmap.lib.marker.MapMarkerIcon
-import org.isen.carburmap.lib.marker.MarkerManager
-import org.openstreetmap.gui.jmapviewer.Coordinate
-import java.awt.*
+import org.isen.carburmap.view.impl.MapView
 import java.security.KeyStore
 import java.security.cert.Certificate
 import java.security.cert.CertificateFactory
-import javax.swing.*
 
 fun main() {
     customKeyStore()
-    val frame = JFrame("Carte interactive mieux que Fressel")
+    /*val frame = JFrame("Carte interactive mieux que Fressel")
     frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
     val map = JMapViewer()
     val panel = JPanel(BorderLayout())
@@ -29,7 +22,13 @@ fun main() {
     model.fetchAllCities()
     model.findStationByJSON(48.712, 2.371, 5000)
 
-    model.register("stationsList", MarkerManager(map))
+    model.register(ICarburMapModel.DataType.Stations, MarkerManager(map))*/
+    val model = DefaultCarburmapModel()
+    val controller = CarburMapController(model)
+    val view = MapView(controller)
+    controller.registerViewToCarburMapData(view)
+    controller.displayViews()
+
 }
 
 fun customKeyStore() {
