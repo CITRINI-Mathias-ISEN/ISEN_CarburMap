@@ -1,6 +1,7 @@
 package org.isen.carburmap.model
 
 import org.isen.carburmap.data.Field
+import org.isen.carburmap.data.Filters
 import java.beans.PropertyChangeListener
 
 interface ICarburMapModel {
@@ -9,9 +10,10 @@ interface ICarburMapModel {
     }
     fun register(datatype:DataType,listener:PropertyChangeListener)
     fun unregister(listener:PropertyChangeListener)
-    fun findStationByJSON(lat:Double, lon:Double, radius:Long)
+    fun findStationByJSON(lat:Double, lon:Double, filters: Filters)
 
-    fun findStationByXML(lat:Double, lon:Double, radius:Long)
+    fun findStationByXML(lat:Double, lon:Double, filters: Filters)
     fun changeCurrentSelection(id:Long)
     fun fetchAllCities() : Array<Field>?
+    fun filtrage(filters: Filters)
 }

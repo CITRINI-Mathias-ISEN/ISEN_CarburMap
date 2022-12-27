@@ -1,18 +1,19 @@
 package org.isen.carburmap.ctrl
 
+import org.isen.carburmap.data.Filters
 import org.isen.carburmap.model.ICarburMapModel
 import org.isen.carburmap.view.ICarburMapView
 
 class CarburMapController(val model:ICarburMapModel) {
     private val views = mutableListOf<ICarburMapView>()
 
-    fun displayViews(){
+    fun displayViews(lat: Double, lon: Double, filters: Filters) {
         views.forEach(){
             it.display()
         }
         model.fetchAllCities()
-        //model.findStationByJSON(48.712, 2.371, 5000)
-        model.findStationByXML(48.712, 2.371, 5000)
+        model.findStationByJSON(lat, lon, filters)
+        //model.findStationByXML(lat, lon, filters)
     }
 
     fun closeView(){

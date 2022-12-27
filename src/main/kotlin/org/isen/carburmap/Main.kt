@@ -1,6 +1,7 @@
 package org.isen.carburmap
 
 import com.github.kittinunf.fuel.core.FuelManager
+import example.StartPage
 import org.isen.carburmap.model.impl.DefaultCarburmapModel
 import org.isen.carburmap.ctrl.CarburMapController
 import org.isen.carburmap.view.impl.MapView
@@ -26,8 +27,7 @@ fun main() {
     val model = DefaultCarburmapModel()
     val controller = CarburMapController(model)
     val view = MapView(controller)
-    controller.registerViewToCarburMapData(view)
-    controller.displayViews()
+    StartPage(controller, view)
 }
 
 fun customKeyStore() {

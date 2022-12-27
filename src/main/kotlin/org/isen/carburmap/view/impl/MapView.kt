@@ -76,7 +76,7 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
     }
 
     override fun propertyChange(evt: PropertyChangeEvent?) {
-        println(evt?.propertyName)
+        //println(evt?.propertyName)
         if(evt?.propertyName == ICarburMapModel.DataType.Stations.toString()) {
             if (evt.newValue !is StationsList) return
             synchronized(map) {
@@ -84,7 +84,7 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
                     val markerIcon = MapMarkerStation(it, "./img/gas-station.png")
                     map.addMapMarker(markerIcon)
                     model.addElement(markerIcon)
-                    println("Station at ${it.coordonnees[0]} ${it.coordonnees[1]}")
+                    //println("Station at ${it.coordonnees[0]} ${it.coordonnees[1]}")
                 }
                 if(evt.oldValue == null) return
                 (evt.oldValue as StationsList).stations.forEach { station ->
@@ -246,7 +246,7 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
     }
 
     override fun mouseClicked(e: MouseEvent?) {
-        println("Mouse clicked")
+        //println("Mouse clicked")
         if (e == null) return
         val marker = map.mapMarkerList.filterIsInstance<MapMarkerStation>().firstOrNull {
             it.mouseClicked(e)

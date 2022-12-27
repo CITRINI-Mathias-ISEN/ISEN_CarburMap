@@ -7,7 +7,7 @@ import org.isen.carburmap.data.json.StationsListJSON
 import org.isen.carburmap.data.xml.StationsListXML
 
 public class StationsList {
-    public val stations : ArrayList<Station> = ArrayList<Station>()
+    public var stations : ArrayList<Station> = ArrayList<Station>()
 
     constructor(stations : StationsListJSON) {
         for (record in stations.records) {

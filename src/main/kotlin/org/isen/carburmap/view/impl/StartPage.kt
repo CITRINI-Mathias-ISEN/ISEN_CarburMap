@@ -1,18 +1,23 @@
 package example
 
+import org.isen.carburmap.ctrl.CarburMapController
 import org.isen.carburmap.data.Field
+import org.isen.carburmap.data.Filters
 import org.isen.carburmap.model.impl.DefaultCarburmapModel
+import org.isen.carburmap.view.impl.MapView
 import java.awt.* // ktlint-disable no-wildcard-imports
 import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
 import javax.swing.* // ktlint-disable no-wildcard-imports
 
-class StartPage : JPanel()  {
+class StartPage(var controller: CarburMapController, var view: MapView) : JPanel()  {
     // Search
     private val model = DefaultCarburmapModel()
     private val allCitiesArray : Array<Field>? = model.fetchAllCities()!!
     private val array : Array<String> = allCitiesArray!!.map { it.name }.distinct().toTypedArray()
     private val combo = JComboBox(array)
+
+    private val searchPanel = JPanel(BorderLayout())
 
     // Fuel
     private val fuelPanel = JPanel(GridLayout(3, 2, 2, 2))
@@ -22,7 +27,21 @@ class StartPage : JPanel()  {
 
     // All
     private val box = Box.createVerticalBox()
+    private var filters = Filters()
 
+    init {
+        EventQueue.invokeLater {
+            JFrame().apply {
+                defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE
+                contentPane.add(makeUI())
+                pack()
+                isResizable = false
+                setLocationRelativeTo(null)
+                isVisible = true
+            }
+        }
+        controller.registerViewToCarburMapData(view)
+    }
     private fun makeUI() : JPanel{
         box.add(makeSearchPanel())
         box.add(Box.createVerticalStrut(5))
@@ -45,7 +64,6 @@ class StartPage : JPanel()  {
         (field as? JTextField)?.text = ""
         field.addKeyListener(ComboKeyHandler(combo))
 
-        val searchPanel = JPanel(BorderLayout())
         searchPanel.border = BorderFactory.createTitledBorder("Search")
         searchPanel.add(combo, BorderLayout.NORTH)
 
@@ -62,7 +80,7 @@ class StartPage : JPanel()  {
             "gplc"
         )
         fuelPanel.border = BorderFactory.createTitledBorder("Fuel Type")
-        val fuelCheckboxArray: Array<JCheckBox> = fuelNameArray.map { JCheckBox(it, true) }.toTypedArray()
+        val fuelCheckboxArray: Array<JCheckBox> = fuelNameArray.map { JCheckBox(it, false) }.toTypedArray()
         fuelCheckboxArray.forEach { fuelPanel.add(it) }
         return fuelPanel
     }
@@ -74,7 +92,7 @@ class StartPage : JPanel()  {
             "Inflation station"
         )
         othersPanel.border = BorderFactory.createTitledBorder("Others")
-        val othersCheckboxArray: Array<JCheckBox> = othersNameArray.map { JCheckBox(it, true) }.toTypedArray()
+        val othersCheckboxArray: Array<JCheckBox> = othersNameArray.map { JCheckBox(it, false) }.toTypedArray()
         othersCheckboxArray.forEach { othersPanel.add(it) }
         return othersPanel
     }
@@ -85,42 +103,52 @@ class StartPage : JPanel()  {
         searchButton.horizontalAlignment = SwingConstants.CENTER
         buttonPanel.add(searchButton)
         searchButton.addActionListener {
-            println("Search bar : " + combo.selectedItem)
-            // combo.selectedItem in array
-            for (i in 0 until allCitiesArray!!.size) {
-                if (allCitiesArray[i].name == combo.selectedItem) {
-                    println("City found : " + allCitiesArray[i].name + " " + allCitiesArray[i].gps_lat + " " + allCitiesArray[i].gps_lng)
-                    break
+            // Fuel part
+            filters.e10 = (fuelPanel.components[0] as JCheckBox).isSelected
+            filters.e85 = (fuelPanel.components[1] as JCheckBox).isSelected
+            filters.sp98 = (fuelPanel.components[2] as JCheckBox).isSelected
+            filters.gazole = (fuelPanel.components[3] as JCheckBox).isSelected
+            filters.sp95 = (fuelPanel.components[4] as JCheckBox).isSelected
+            filters.gplc = (fuelPanel.components[5] as JCheckBox).isSelected
+
+            // Others part
+            filters.Toilet = (othersPanel.components[0] as JCheckBox).isSelected
+            filters.FoodStore = (othersPanel.components[1] as JCheckBox).isSelected
+            filters.InflationStation = (othersPanel.components[2] as JCheckBox).isSelected
+            println(filters)
+
+            // Search part
+            val regex = Regex("([-+]?)([\\d]{1,2})(((\\.)(\\d+)(,)))(\\s*)(([-+]?)([\\d]{1,3})((\\.)(\\d+))?)\$")
+            var lat = 0.0
+            var lon = 0.0
+
+            if (combo.selectedItem == null)
+                searchPanel.border = BorderFactory.createTitledBorder("Search (Please select a city)")
+            else {
+                if (combo.selectedItem!!.toString().matches(regex)){
+                    lat = combo.selectedItem!!.toString().split(",")[0].toDouble()
+                    lon = combo.selectedItem!!.toString().split(",")[1].toDouble()
                 }
-            }
-            println("Fuel : ")
-            fuelPanel.components.forEach {
-                if (it is JCheckBox) {
-                    println(it.text + " : " + it.isSelected)
+                else {
+                    val cityField = allCitiesArray!!.find { it.name == combo.selectedItem!!.toString() }
+                    if (cityField != null) {
+                        lat = cityField.gps_lat
+                        lon = cityField.gps_lng
+                    }
+                    else {
+                        searchPanel.border = BorderFactory.createTitledBorder("Search (Please select a city)")
+                        return@addActionListener
+                    }
                 }
+                searchPanel.border = BorderFactory.createTitledBorder("Search")
+                controller.displayViews(lat, lon, filters)
             }
-            println("Others : ")
-            othersPanel.components.forEach {
-                if (it is JCheckBox) {
-                    println(it.text + " : " + it.isSelected)
-                }
-            }
+
+
         }
         return buttonPanel
     }
 
-    @Deprecated("Deprecated in Java")
-    fun display(){
-        EventQueue.invokeLater {
-            JFrame().apply {
-                defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE
-                contentPane.add(makeUI())
-                pack()
-                setLocationRelativeTo(null)
-                isVisible = true
-            }
-        }
-    }
 }
 
 private class ComboKeyHandler(private val comboBox: JComboBox<String>) : KeyAdapter() {
@@ -193,6 +221,3 @@ private class ComboKeyHandler(private val comboBox: JComboBox<String>) : KeyAdap
     }
 }
 
-fun main() {
-    StartPage().display()
-}
