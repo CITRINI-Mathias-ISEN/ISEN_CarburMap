@@ -39,9 +39,6 @@ open class MapMarkerIcon(var coord: Coordinate, imgPath : String = "./img/gas-st
         if (layer == null || layer!!.isVisibleTexts) paintText(g, position)
         this.position = position
         this.size = Dimension(imgToDraw.getWidth(null), imgToDraw.getHeight(null))
-        //verify if a point is inside the marker
-//val p = Point(0, 0)
-//if (p.x >= position.x - halfWidth && p.x <= position.x + halfWidth && p.y >= position.y - halfHeight && p.y <= position.y + halfHeight) {
     }
     open fun imageToDraw(radio: Int) : Image {
         return getImageSizeToDraw(radio, img)
