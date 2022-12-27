@@ -1,6 +1,6 @@
 package org.isen.carburmap.model
 
-import GeoDistanceHelper
+import org.isen.carburmap.lib.geo.GeoDistanceHelper
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*

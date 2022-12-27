@@ -1,6 +1,6 @@
 package org.isen.carburmap.model.impl
 
-import GeoDistanceHelper
+import org.isen.carburmap.lib.geo.GeoDistanceHelper
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule
@@ -10,6 +10,7 @@ import com.github.kittinunf.fuel.httpGet
 import com.google.gson.Gson
 import org.apache.logging.log4j.kotlin.Logging
 import org.isen.carburmap.data.*
+import org.isen.carburmap.data.json.StationsListJSON
 import org.isen.carburmap.data.xml.Pdv
 import org.isen.carburmap.lib.marker.MapMarkerStation
 import org.isen.carburmap.model.ICarburMapModel
