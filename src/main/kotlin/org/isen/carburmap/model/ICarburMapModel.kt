@@ -4,7 +4,10 @@ import org.isen.carburmap.data.Field
 import java.beans.PropertyChangeListener
 
 interface ICarburMapModel {
-    fun register(datatype:String?,listener:PropertyChangeListener)
+    enum class DataType {
+        Stations, SelectedStation, Carto
+    }
+    fun register(datatype:DataType,listener:PropertyChangeListener)
     fun unregister(listener:PropertyChangeListener)
     fun findStationByJSON(x:Double, y:Double, radius:Long)
 

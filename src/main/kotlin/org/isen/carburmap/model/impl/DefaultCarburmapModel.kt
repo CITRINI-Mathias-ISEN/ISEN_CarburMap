@@ -4,6 +4,7 @@ import com.github.kittinunf.fuel.httpGet
 import com.google.gson.Gson
 import org.apache.logging.log4j.kotlin.Logging
 import org.isen.carburmap.data.*
+import org.isen.carburmap.lib.marker.MapMarkerStation
 import org.isen.carburmap.model.ICarburMapModel
 import java.beans.PropertyChangeListener
 import java.beans.PropertyChangeSupport
@@ -18,7 +19,7 @@ class DefaultCarburmapModel : ICarburMapModel {
     private var stationsList : StationsList? by Delegates.observable(null) {
             _, oldValue, newValue ->
         logger.info("stationInformation updated")
-        pcs.firePropertyChange("stationsList", oldValue, newValue)
+        pcs.firePropertyChange(ICarburMapModel.DataType.Stations.toString(), oldValue, newValue)
     }
 
     private var villesList : Array<Field>? by Delegates.observable(null) {
@@ -27,13 +28,19 @@ class DefaultCarburmapModel : ICarburMapModel {
         pcs.firePropertyChange("villesList", oldValue, newValue)
     }
 
+    var selectedMapMarkerStation: MapMarkerStation? by Delegates.observable(null) {
+            _, oldValue, newValue ->
+        logger.info("update selectedStation $newValue")
+        pcs.firePropertyChange(ICarburMapModel.DataType.SelectedStation.toString(), oldValue, newValue)
+    }
+
     override fun findStationByJSON(x:Double, y:Double, radius:Long) {
             "https://data.economie.gouv.fr//api/records/1.0/search/?dataset=prix-carburants-fichier-instantane-test-ods-copie&q=&rows=-1&geofilter.distance=$x%2C+$y%2C+$radius"
             .httpGet()
             .responseObject(StationsListJSON.Deserializer()) { request, response, result ->
                 val (data, error) = result
                 if (data != null) {
-                    stationsList = StationsList(data!!)
+                    stationsList = StationsList(data)
                     println(stationsList!!.stations[0].prix)
                     println(stationsList!!.stations[0].services)
                     println(stationsList!!.stations[0].horaires)
@@ -61,8 +68,8 @@ class DefaultCarburmapModel : ICarburMapModel {
 
     }
 
-    override fun register(datatype:String?, listener:PropertyChangeListener){
-        pcs.addPropertyChangeListener(datatype, listener)
+    override fun register(datatype:ICarburMapModel.DataType, listener:PropertyChangeListener){
+        pcs.addPropertyChangeListener(datatype.toString(), listener)
     }
     override fun unregister(listener:PropertyChangeListener){
         //TODO

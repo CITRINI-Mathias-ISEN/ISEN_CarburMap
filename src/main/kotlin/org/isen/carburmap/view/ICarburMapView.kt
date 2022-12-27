@@ -1,6 +1,8 @@
 package org.isen.carburmap.view
 
-interface ICarburMapView {
+import java.beans.PropertyChangeListener
+
+interface ICarburMapView : PropertyChangeListener {
     fun display()
     fun close()
 }
