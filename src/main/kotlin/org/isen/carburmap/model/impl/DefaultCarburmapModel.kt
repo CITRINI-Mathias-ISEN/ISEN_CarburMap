@@ -59,7 +59,7 @@ class DefaultCarburmapModel : ICarburMapModel {
      * @return the list of stations in a radius of distance from your position
      */
     override fun findStationByJSON(lat:Double, lon:Double, filters:Filters) {
-            "https://data.economie.gouv.fr//api/records/1.0/search/?dataset=prix-carburants-fichier-instantane-test-ods-copie&q=&rows=-1&geofilter.distance=$lat%2C+$lon%2C+5000"
+            "https://data.economie.gouv.fr//api/records/1.0/search/?dataset=prix-carburants-fichier-instantane-test-ods-copie&q=&rows=-1&geofilter.distance=$lat%2C+$lon%2C+10000"
             .httpGet()
             .responseObject(StationsListJSON.Deserializer()) { request, response, result ->
                 val (data, error) = result
@@ -88,7 +88,7 @@ class DefaultCarburmapModel : ICarburMapModel {
         var data = kotlinXmlMapper.readValue(xml, StationsListXML::class.java)
         if (data != null) {
             val geoDistanceHelper = GeoDistanceHelper(lat, lon)
-            data.pdv = data.pdv.filter{ geoDistanceHelper.calculate(it.latitude.toDouble() / 100000, it.longitude.toDouble() / 100000) < 5000.0 } as ArrayList<Pdv>
+            data.pdv = data.pdv.filter{ geoDistanceHelper.calculate(it.latitude.toDouble() / 100000, it.longitude.toDouble() / 100000) < 10000.0 } as ArrayList<Pdv>
             stationsList = StationsList(data)
             filtrage(filters)
             stationsListFinal = stationsList
