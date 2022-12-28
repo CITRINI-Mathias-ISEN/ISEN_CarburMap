@@ -1,7 +1,7 @@
 package org.isen.carburmap.data
 
 
-data class Field(
+data class Ville(
     val id: Long,
     val name: String,
     val gps_lat: Double,

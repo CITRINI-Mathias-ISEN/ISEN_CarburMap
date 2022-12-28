@@ -1,8 +1,7 @@
 package example
 
 import org.isen.carburmap.ctrl.CarburMapController
-import org.isen.carburmap.data.Field
-import org.isen.carburmap.data.Filters
+import org.isen.carburmap.data.*
 import org.isen.carburmap.model.impl.DefaultCarburmapModel
 import org.isen.carburmap.view.impl.MapView
 import java.awt.* // ktlint-disable no-wildcard-imports
@@ -13,8 +12,8 @@ import javax.swing.* // ktlint-disable no-wildcard-imports
 class StartPage(var controller: CarburMapController, var view: MapView) : JPanel()  {
     // Search
     private val model = DefaultCarburmapModel()
-    private val allCitiesArray : Array<Field>? = model.fetchAllCities()!!
-    private val array : Array<String> = allCitiesArray!!.map { it.name }.distinct().toTypedArray()
+    private val allCitiesArray : Array<Ville>? = model.fetchAllCities()!!
+    private val array : Array<String> = allCitiesArray!!.map { "${it.name} (${it.zip_code})" }.toTypedArray()
     private val combo = JComboBox(array)
 
     private val searchPanel = JPanel(BorderLayout())
@@ -130,7 +129,8 @@ class StartPage(var controller: CarburMapController, var view: MapView) : JPanel
                     lon = combo.selectedItem!!.toString().split(",")[1].toDouble()
                 }
                 else {
-                    val cityField = allCitiesArray!!.find { it.name == combo.selectedItem!!.toString() }
+                    val (villeTmp,cpTmp) = combo.selectedItem!!.toString().split(" (")
+                    val cityField = allCitiesArray!!.find { it.name == villeTmp && it.zip_code == cpTmp.substring(0, cpTmp.length - 1) }
                     if (cityField != null) {
                         lat = cityField.gps_lat
                         lon = cityField.gps_lng

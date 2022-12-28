@@ -39,7 +39,7 @@ class DefaultCarburmapModel : ICarburMapModel {
         pcs.firePropertyChange(ICarburMapModel.DataType.Stations.toString(), oldValue, newValue)
     }
 
-    private var villesList : Array<Field>? by Delegates.observable(null) {
+    private var villesList : Array<Ville>? by Delegates.observable(null) {
             _, oldValue, newValue ->
         logger.info("stationInformation updated")
         pcs.firePropertyChange("villesList", oldValue, newValue)
@@ -97,12 +97,12 @@ class DefaultCarburmapModel : ICarburMapModel {
         }
     }
 
-     override fun fetchAllCities() : Array<Field>? {
+     override fun fetchAllCities() : Array<Ville>? {
 
         val content = ClassLoader.getSystemClassLoader().getResource("./cities.json")?.readText(Charsets.UTF_8)
 
         val gson = Gson()
-        villesList = gson.fromJson(content, Array<Field>::class.java)
+        villesList = gson.fromJson(content, Array<Ville>::class.java)
         println(villesList!![0].zip_code)
         return villesList!!
 
