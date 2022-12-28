@@ -7,10 +7,15 @@ import org.isen.carburmap.view.ICarburMapView
 class CarburMapController(val model:ICarburMapModel) {
     private val views = mutableListOf<ICarburMapView>()
 
-    fun displayViews(lat: Double, lon: Double, filters: Filters) {
+    fun displayViews() {
         views.forEach(){
             it.display()
         }
+        model.fetchAllCities()
+        //model.findStationByXML(lat, lon, filters)
+    }
+
+    fun updateData(lat: Double, lon: Double, filters: Filters) {
         model.fetchAllCities()
         model.findStationByJSON(lat, lon, filters)
         //model.findStationByXML(lat, lon, filters)

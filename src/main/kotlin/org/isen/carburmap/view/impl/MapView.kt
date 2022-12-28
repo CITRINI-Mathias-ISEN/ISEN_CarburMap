@@ -95,6 +95,9 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
                 (evt.oldValue as StationsList).stations.forEach { station ->
                     val toRemove = map.mapMarkerList.filter { (it is MapMarkerStation) && (it.station == station) }
                     map.mapMarkerList.removeAll(toRemove)
+                    if (controller.model is DefaultCarburmapModel) {
+                        controller.model.selectedMapMarkerStation = null
+                    }
                     toRemove.forEach(model::removeElement)
                 }
 

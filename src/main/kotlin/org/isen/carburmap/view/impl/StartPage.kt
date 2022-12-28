@@ -1,15 +1,16 @@
-package example
+package org.isen.carburmap.view.impl
 
 import org.isen.carburmap.ctrl.CarburMapController
 import org.isen.carburmap.data.*
 import org.isen.carburmap.model.impl.DefaultCarburmapModel
-import org.isen.carburmap.view.impl.MapView
+import org.isen.carburmap.view.ICarburMapView
 import java.awt.* // ktlint-disable no-wildcard-imports
 import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
+import java.beans.PropertyChangeEvent
 import javax.swing.* // ktlint-disable no-wildcard-imports
 
-class StartPage(var controller: CarburMapController, var view: MapView) : JPanel()  {
+class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView  {
     // Search
     private val model = DefaultCarburmapModel()
     private val allCitiesArray : Array<Ville>? = model.fetchAllCities()!!
@@ -28,19 +29,6 @@ class StartPage(var controller: CarburMapController, var view: MapView) : JPanel
     private val box = Box.createVerticalBox()
     private var filters = Filters()
 
-    init {
-        EventQueue.invokeLater {
-            JFrame().apply {
-                defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE
-                contentPane.add(makeUI())
-                pack()
-                isResizable = false
-                setLocationRelativeTo(null)
-                isVisible = true
-            }
-        }
-        controller.registerViewToCarburMapData(view)
-    }
     private fun makeUI() : JPanel{
         box.add(makeSearchPanel())
         box.add(Box.createVerticalStrut(5))
@@ -141,12 +129,33 @@ class StartPage(var controller: CarburMapController, var view: MapView) : JPanel
                     }
                 }
                 searchPanel.border = BorderFactory.createTitledBorder("Search")
-                controller.displayViews(lat, lon, filters)
+                controller.updateData(lat, lon, filters)
             }
 
 
         }
         return buttonPanel
+    }
+
+    override fun display() {
+        EventQueue.invokeLater {
+            JFrame().apply {
+                defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE
+                contentPane.add(makeUI())
+                pack()
+                isResizable = false
+                setLocationRelativeTo(null)
+                isVisible = true
+            }
+        }
+    }
+
+    override fun close() {
+        TODO("Not yet implemented")
+    }
+
+    override fun propertyChange(evt: PropertyChangeEvent?) {
+        //
     }
 
 }

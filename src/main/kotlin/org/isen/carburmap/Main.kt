@@ -1,7 +1,7 @@
 package org.isen.carburmap
 
 import com.github.kittinunf.fuel.core.FuelManager
-import example.StartPage
+import org.isen.carburmap.view.impl.StartPage
 import org.isen.carburmap.model.impl.DefaultCarburmapModel
 import org.isen.carburmap.ctrl.CarburMapController
 import org.isen.carburmap.view.impl.MapView
@@ -26,8 +26,15 @@ fun main() {
     model.register(ICarburMapModel.DataType.Stations, MarkerManager(map))*/
     val model = DefaultCarburmapModel()
     val controller = CarburMapController(model)
-    val view = MapView(controller)
-    StartPage(controller, view)
+    val mapView = MapView(controller)
+    val filterView = StartPage(controller)
+
+    controller.registerViewToCarburMapData(mapView)
+    controller.registerViewToCarburMapData(filterView)
+
+    controller.displayViews()
+
+    //add start page to view after mvc remap
 }
 
 fun customKeyStore() {
