@@ -16,6 +16,7 @@ repositories {
 dependencies {
     //map
     implementation("org.openstreetmap.jmapviewer:jmapviewer:2.16")
+    implementation("com.graphhopper:directions-api-client-hc:6.2")
 
     //Kotlin
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
