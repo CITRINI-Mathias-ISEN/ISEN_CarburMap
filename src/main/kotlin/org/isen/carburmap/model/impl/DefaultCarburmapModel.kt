@@ -42,7 +42,7 @@ class DefaultCarburmapModel : ICarburMapModel {
     private var villesList : Array<Ville>? by Delegates.observable(null) {
             _, oldValue, newValue ->
         logger.info("stationInformation updated")
-        pcs.firePropertyChange("villesList", oldValue, newValue)
+        pcs.firePropertyChange(ICarburMapModel.DataType.Stations.toString(), oldValue, newValue)
     }
 
     var selectedMapMarkerStation: MapMarkerStation? by Delegates.observable(null) {
@@ -55,7 +55,6 @@ class DefaultCarburmapModel : ICarburMapModel {
      * Get the list of stations from the JSON API
      * @param lat latitude of your position
      * @param lon longitude of your position
-     * @param distance radius of the search in meters
      * @return the list of stations in a radius of distance from your position
      */
     override fun findStationByJSON(lat:Double, lon:Double, filters:Filters) {
@@ -78,7 +77,6 @@ class DefaultCarburmapModel : ICarburMapModel {
      * Get the list of stations from the XML API
      * @param lat latitude of your position
      * @param lon longitude of your position
-     * @param distance radius of the search in meters
      * @return the list of stations in a radius of distance from your position
      */
     override fun findStationByXML(lat:Double, lon:Double, filters:Filters) {
@@ -88,7 +86,7 @@ class DefaultCarburmapModel : ICarburMapModel {
         var data = kotlinXmlMapper.readValue(xml, StationsListXML::class.java)
         if (data != null) {
             val geoDistanceHelper = GeoDistanceHelper(lat, lon)
-            data.pdv = data.pdv.filter{ geoDistanceHelper.calculate(it.latitude.toDouble() / 100000, it.longitude.toDouble() / 100000) < 5000.0 } as ArrayList<Pdv>
+            data.pdv = data.pdv.filter{ geoDistanceHelper.calculate(it.latitude / 100000, it.longitude / 100000) < 5000.0 } as ArrayList<Pdv>
             stationsList = StationsList(data)
             filtrage(filters)
             stationsListFinal = stationsList

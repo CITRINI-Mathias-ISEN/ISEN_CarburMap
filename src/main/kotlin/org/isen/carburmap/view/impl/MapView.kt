@@ -26,8 +26,8 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
     private val model = DefaultListModel<MapMarkerStation>()
     private val list = object : JList<MapMarkerStation>(model) {
         override fun updateUI() {
-            selectionForeground = null // Nimbus
-            selectionBackground = null // Nimbus
+            selectionForeground = null
+            selectionBackground = null
             cellRenderer = null
             super.updateUI()
             layoutOrientation = VERTICAL
@@ -81,7 +81,6 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
     }
 
     override fun propertyChange(evt: PropertyChangeEvent?) {
-        //println(evt?.propertyName)
         if(evt?.propertyName == ICarburMapModel.DataType.Stations.toString()) {
             if (evt.newValue !is StationsList) return
             synchronized(map) {
@@ -89,12 +88,11 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
                     val markerIcon = MapMarkerStation(it, "./img/gas-station.png")
                     map.addMapMarker(markerIcon)
                     model.addElement(markerIcon)
-                    //println("Station at ${it.coordonnees[0]} ${it.coordonnees[1]}")
                 }
                 if(evt.oldValue == null) return
                 (evt.oldValue as StationsList).stations.forEach { station ->
                     val toRemove = map.mapMarkerList.filter { (it is MapMarkerStation) && (it.station == station) }
-                    map.mapMarkerList.removeAll(toRemove)
+                    map.mapMarkerList.removeAll(toRemove.toSet())
                     if (controller.model is DefaultCarburmapModel) {
                         controller.model.selectedMapMarkerStation = null
                     }
@@ -134,8 +132,8 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
         private val box: Box = Box.createVerticalBox()
         private val prixList: JList<Prix> = object : JList<Prix>() {
             override fun updateUI() {
-                selectionForeground = null // Nimbus
-                selectionBackground = null // Nimbus
+                selectionForeground = null
+                selectionBackground = null
                 cellRenderer = null
                 super.updateUI()
                 layoutOrientation = HORIZONTAL_WRAP
@@ -167,10 +165,10 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
         fun makeGridBagLayoutPanel(atrName : String, label: String, comp: JLabel): Component {
             val c = GridBagConstraints()
             val panel = JPanel(GridBagLayout())
-            val GAP = 5
+            val gap = 5
             fieldComp[atrName] = comp
 
-            c.insets = Insets(GAP, GAP, GAP, 0)
+            c.insets = Insets(gap, gap, gap, 0)
             c.anchor = GridBagConstraints.LINE_END
             panel.add(JLabel(label), c)
 
@@ -254,7 +252,6 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
     }
 
     override fun mouseClicked(e: MouseEvent?) {
-        //println("Mouse clicked")
         if (e == null) return
         val marker = map.mapMarkerList.filterIsInstance<MapMarkerStation>().firstOrNull {
             it.mouseClicked(e)

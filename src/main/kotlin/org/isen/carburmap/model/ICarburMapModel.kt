@@ -5,7 +5,7 @@ import java.beans.PropertyChangeListener
 
 interface ICarburMapModel {
     enum class DataType {
-        Stations, SelectedStation, Carto
+        Stations, SelectedStation, VillesList
     }
     fun register(datatype:DataType,listener:PropertyChangeListener)
     fun unregister(listener:PropertyChangeListener)

@@ -4,11 +4,11 @@ import org.isen.carburmap.ctrl.CarburMapController
 import org.isen.carburmap.data.*
 import org.isen.carburmap.model.impl.DefaultCarburmapModel
 import org.isen.carburmap.view.ICarburMapView
-import java.awt.* // ktlint-disable no-wildcard-imports
+import java.awt.*
 import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
 import java.beans.PropertyChangeEvent
-import javax.swing.* // ktlint-disable no-wildcard-imports
+import javax.swing.*
 
 class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView  {
     // Search
@@ -154,9 +154,7 @@ class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView 
         TODO("Not yet implemented")
     }
 
-    override fun propertyChange(evt: PropertyChangeEvent?) {
-        //
-    }
+    override fun propertyChange(evt: PropertyChangeEvent?) {}
 
 }
 

@@ -22,7 +22,7 @@ class CarburMapController(val model:ICarburMapModel) {
     }
 
     fun closeView(){
-        views.forEach(){
+        views.forEach {
             it.close()
         }
     }
@@ -31,7 +31,7 @@ class CarburMapController(val model:ICarburMapModel) {
         if(!this.views.contains(v)){
             this.views.add(v)
             this.model.register(ICarburMapModel.DataType.Stations, v)
-            this.model.register(ICarburMapModel.DataType.Carto, v)
+            this.model.register(ICarburMapModel.DataType.VillesList, v)
             this.model.register(ICarburMapModel.DataType.SelectedStation, v)
         }
     }

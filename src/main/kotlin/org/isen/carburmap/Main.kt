@@ -11,19 +11,6 @@ import java.security.cert.CertificateFactory
 
 fun main() {
     customKeyStore()
-    /*val frame = JFrame("Carte interactive mieux que Fressel")
-    frame.defaultCloseOperation = JFrame.EXIT_ON_CLOSE
-    val map = JMapViewer()
-    val panel = JPanel(BorderLayout())
-    panel.add(JScrollPane(map))
-    frame.add(panel)
-    frame.setSize(800, 600)
-    frame.isVisible = true
-    val model = DefaultCarburmapModel()
-    model.fetchAllCities()
-    model.findStationByJSON(48.712, 2.371, 5000)
-
-    model.register(ICarburMapModel.DataType.Stations, MarkerManager(map))*/
     val model = DefaultCarburmapModel()
     val controller = CarburMapController(model)
     val mapView = MapView(controller)
@@ -33,8 +20,6 @@ fun main() {
     controller.registerViewToCarburMapData(filterView)
 
     controller.displayViews()
-
-    //add start page to view after mvc remap
 }
 
 fun customKeyStore() {

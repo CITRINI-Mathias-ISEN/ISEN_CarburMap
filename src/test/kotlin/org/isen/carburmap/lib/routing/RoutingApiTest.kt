@@ -1,13 +1,7 @@
 package org.isen.carburmap.lib.routing
 
 import com.graphhopper.util.shapes.GHPoint
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import java.text.DateFormat
-import java.text.SimpleDateFormat
-import java.time.Instant
-import java.util.*
-import java.util.concurrent.TimeUnit
 
 
 class RoutingApiTest{

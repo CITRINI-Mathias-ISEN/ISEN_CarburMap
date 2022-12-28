@@ -6,8 +6,8 @@ import com.google.gson.annotations.SerializedName
 import org.isen.carburmap.data.json.StationsListJSON
 import org.isen.carburmap.data.xml.StationsListXML
 
-public class StationsList {
-    public var stations : ArrayList<Station> = ArrayList<Station>()
+class StationsList {
+    var stations : ArrayList<Station> = ArrayList<Station>()
 
     constructor(stations : StationsListJSON) {
         for (record in stations.records) {
@@ -22,7 +22,7 @@ public class StationsList {
                 val coordonnees = record.fields.geom
                 val services = ArrayList<String>()
                 record.fields.services_service?.split("//")?.forEach { services.add(it) }
-                var station : Station = Station(id, cp, adresse, ville, automate_24_24, surRoute, coordonnees)
+                var station = Station(id, cp, adresse, ville, automate_24_24, surRoute, coordonnees)
                 this.stations.add(station)
                 station.services = services
                 val gson = Gson()

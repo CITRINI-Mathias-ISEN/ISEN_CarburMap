@@ -9,7 +9,7 @@ import java.awt.geom.Path2D
 
 class MapPath(private var path : ResponsePath) : MapObjectImpl(null, null, null), MapPolygon {
     private val points = path.points.map { Coordinate(it.lat, it.lon) }
-    private var isMainPoint = true;
+    private var isMainPoint = true
     override fun getPoints(): List<Coordinate> {
         return points
     }
