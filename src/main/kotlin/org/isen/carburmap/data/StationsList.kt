@@ -75,9 +75,9 @@ public class StationsList {
 
 data class Station(
     val id: Long,
-    val cp: String,
-    val adresse: String,
-    val ville: String,
+    val cp: String?=null,
+    val adresse: String?=null,
+    val ville: String?=null,
     val automate_24_24: Boolean,
     val surRoute: Boolean,
     val coordonnees: Array<Double>,
