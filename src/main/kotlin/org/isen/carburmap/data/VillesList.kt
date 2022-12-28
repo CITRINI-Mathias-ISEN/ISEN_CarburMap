@@ -6,4 +6,5 @@ data class Field(
     val name: String,
     val gps_lat: Double,
     val gps_lng: Double,
+    val zip_code: String,
 )

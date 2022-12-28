@@ -103,7 +103,7 @@ class DefaultCarburmapModel : ICarburMapModel {
 
         val gson = Gson()
         villesList = gson.fromJson(content, Array<Field>::class.java)
-        //println(villesList!![0].name)
+        println(villesList!![0].zip_code)
         return villesList!!
 
     }
