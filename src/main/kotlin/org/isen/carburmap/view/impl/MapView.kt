@@ -5,6 +5,8 @@ import org.isen.carburmap.ctrl.CarburMapController
 import org.isen.carburmap.data.Prix
 import org.isen.carburmap.data.StationsList
 import org.isen.carburmap.lib.marker.MapMarkerStation
+import org.isen.carburmap.lib.routing.MapPath
+import org.isen.carburmap.lib.routing.RoutingEngine
 import org.isen.carburmap.model.ICarburMapModel
 import org.isen.carburmap.model.impl.DefaultCarburmapModel
 import org.isen.carburmap.view.ICarburMapView
@@ -56,6 +58,9 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
     }
 
     private fun createStationMapPanel(): Component {
+        //TODO: supprimer l'exemple
+        val routingEngineRes = RoutingEngine.getInstance().getPathCar(43.56345578807291, 4.0916781735807675, 43.60554813079337, 3.87394831667493)
+        map.addMapPolygon(MapPath(routingEngineRes))
         return JScrollPane(map)
     }
 
@@ -130,7 +135,7 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
                 selectionBackground = null // Nimbus
                 cellRenderer = null
                 super.updateUI()
-                layoutOrientation = JList.HORIZONTAL_WRAP
+                layoutOrientation = HORIZONTAL_WRAP
                 visibleRowCount = 0
                 border = BorderFactory.createEmptyBorder(5, 10, 5, 10)
                 cellRenderer = PrixListCellRenderer()
