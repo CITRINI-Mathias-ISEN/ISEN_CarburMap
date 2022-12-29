@@ -67,7 +67,6 @@ class DefaultCarburmapModel : ICarburMapModel {
                     filtrage(filters)
                     stationsListFinal = stationsList
                 } else {
-                    println(error)
                     logger.warn("Be careful data is void $error")
                 }
             }
@@ -101,7 +100,7 @@ class DefaultCarburmapModel : ICarburMapModel {
 
         val gson = Gson()
         villesList = gson.fromJson(content, Array<Ville>::class.java)
-        println(villesList!![0].zip_code)
+        //println(villesList!![0].zip_code)
         return villesList!!
 
     }
@@ -157,7 +156,7 @@ class DefaultCarburmapModel : ICarburMapModel {
                 st.prix!!.any { it.carburant == "GPLc"}
             } as ArrayList<Station>
         }
-        stationsList!!.stations.forEach { println(it) }
+        //stationsList!!.stations.forEach { println(it) }
 
     }
 

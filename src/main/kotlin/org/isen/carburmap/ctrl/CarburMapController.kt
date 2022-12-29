@@ -1,5 +1,6 @@
 package org.isen.carburmap.ctrl
 
+import org.apache.logging.log4j.kotlin.logger
 import org.isen.carburmap.data.Filters
 import org.isen.carburmap.model.ICarburMapModel
 import org.isen.carburmap.view.ICarburMapView
@@ -17,8 +18,17 @@ class CarburMapController(val model:ICarburMapModel) {
 
     fun updateData(lat: Double, lon: Double, filters: Filters) {
         model.fetchAllCities()
-        model.findStationByJSON(lat, lon, filters)
-        //model.findStationByXML(lat, lon, filters)
+        if (filters.json && !filters.xml) {
+            //println("JSON")
+            model.findStationByJSON(lat, lon, filters)
+        }
+        else if (!filters.json && filters.xml) {
+            //println("XML")
+            model.findStationByXML(lat, lon, filters)
+        }
+        else {
+            logger().error("Erreur au niveau du saisie des filtres JSON ou XML")
+        }
     }
 
     fun closeView(){

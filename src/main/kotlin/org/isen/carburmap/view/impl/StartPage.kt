@@ -1,20 +1,24 @@
 package org.isen.carburmap.view.impl
 
 import org.isen.carburmap.ctrl.CarburMapController
-import org.isen.carburmap.data.*
+import org.isen.carburmap.data.Filters
+import org.isen.carburmap.data.Ville
 import org.isen.carburmap.model.impl.DefaultCarburmapModel
 import org.isen.carburmap.view.ICarburMapView
-import java.awt.*
+import java.awt.BorderLayout
+import java.awt.Dimension
+import java.awt.EventQueue
+import java.awt.GridLayout
 import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
 import java.beans.PropertyChangeEvent
 import javax.swing.*
 
-class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView  {
+class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView {
     // Search
     private val model = DefaultCarburmapModel()
-    private val allCitiesArray : Array<Ville>? = model.fetchAllCities()!!
-    private val array : Array<String> = allCitiesArray!!.map { "${it.name} (${it.zip_code})" }.toTypedArray()
+    private val allCitiesArray: Array<Ville>? = model.fetchAllCities()!!
+    private val array: Array<String> = allCitiesArray!!.map { "${it.name} (${it.zip_code})" }.toTypedArray()
     private val combo = JComboBox(array)
 
     private val searchPanel = JPanel(BorderLayout())
@@ -25,26 +29,31 @@ class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView 
     // Others
     private val othersPanel = JPanel(GridLayout(2, 1, 2, 2))
 
+    // Methods
+    private val methodsPanel = JPanel(GridLayout(1, 2, 2, 2))
+
     // All
     private val box = Box.createVerticalBox()
     private var filters = Filters()
 
-    private fun makeUI() : JPanel{
+    private fun makeUI(): JPanel {
         box.add(makeSearchPanel())
         box.add(Box.createVerticalStrut(5))
         box.add(makeFuelPanel())
         box.add(Box.createVerticalStrut(5))
         box.add(makeOthersPanel())
         box.add(Box.createVerticalStrut(5))
+        box.add(makeMethodsPanel())
+        box.add(Box.createVerticalStrut(5))
         box.add(makeButtonPanel())
         return JPanel(BorderLayout()).also {
             it.add(box, BorderLayout.NORTH)
             it.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
-            it.preferredSize = Dimension(320, 275)
+            it.preferredSize = Dimension(320, 325)
         }
     }
 
-    private fun makeSearchPanel(): JPanel{
+    private fun makeSearchPanel(): JPanel {
         combo.isEditable = true
         combo.selectedIndex = -1
         val field = combo.editor.editorComponent
@@ -57,7 +66,7 @@ class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView 
         return searchPanel
     }
 
-    private fun makeFuelPanel(): JPanel{
+    private fun makeFuelPanel(): JPanel {
         val fuelNameArray = arrayOf(
             "e10",
             "e85",
@@ -72,7 +81,7 @@ class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView 
         return fuelPanel
     }
 
-    private fun makeOthersPanel(): JPanel{
+    private fun makeOthersPanel(): JPanel {
         val othersNameArray = arrayOf(
             "Toilet",
             "Food store",
@@ -82,6 +91,31 @@ class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView 
         val othersCheckboxArray: Array<JCheckBox> = othersNameArray.map { JCheckBox(it, false) }.toTypedArray()
         othersCheckboxArray.forEach { othersPanel.add(it) }
         return othersPanel
+    }
+
+    private fun makeMethodsPanel(): JPanel {
+        val methodsArray = arrayOf(
+            "JSON",
+            "XML"
+        )
+        methodsPanel.border = BorderFactory.createTitledBorder("Methods")
+        val methodsCheckboxArray: Array<JCheckBox> = methodsArray.map { JCheckBox(it, false) }.toTypedArray()
+        methodsCheckboxArray.forEach { methodsPanel.add(it) }
+        methodsCheckboxArray[0].isSelected = true
+        filters.json = true
+        methodsCheckboxArray[0].addActionListener {
+            if (methodsCheckboxArray[0].isSelected)
+                methodsCheckboxArray[1].isSelected = false
+            else if (!methodsCheckboxArray[0].isSelected && !methodsCheckboxArray[1].isSelected)
+                methodsCheckboxArray[0].isSelected = true
+        }
+        methodsCheckboxArray[1].addActionListener {
+            if (methodsCheckboxArray[1].isSelected)
+                methodsCheckboxArray[0].isSelected = false
+            else if (!methodsCheckboxArray[0].isSelected && !methodsCheckboxArray[1].isSelected)
+                methodsCheckboxArray[1].isSelected = true
+        }
+        return methodsPanel
     }
 
     private fun makeButtonPanel(): JPanel {
@@ -102,7 +136,11 @@ class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView 
             filters.Toilet = (othersPanel.components[0] as JCheckBox).isSelected
             filters.FoodStore = (othersPanel.components[1] as JCheckBox).isSelected
             filters.InflationStation = (othersPanel.components[2] as JCheckBox).isSelected
-            println(filters)
+
+            // Methods part
+            filters.json = (methodsPanel.components[0] as JCheckBox).isSelected
+            filters.xml = (methodsPanel.components[1] as JCheckBox).isSelected
+            //println(filters)
 
             // Search part
             val regex = Regex("([-+]?)([\\d]{1,2})(((\\.)(\\d+)(,)))(\\s*)(([-+]?)([\\d]{1,3})((\\.)(\\d+))?)\$")
@@ -112,18 +150,21 @@ class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView 
             if (combo.selectedItem == null)
                 searchPanel.border = BorderFactory.createTitledBorder("Search (Please select a city)")
             else {
-                if (combo.selectedItem!!.toString().matches(regex)){
+                if (combo.selectedItem!!.toString().matches(regex)) {
                     lat = combo.selectedItem!!.toString().split(",")[0].toDouble()
                     lon = combo.selectedItem!!.toString().split(",")[1].toDouble()
-                }
-                else {
-                    val (villeTmp,cpTmp) = combo.selectedItem!!.toString().split(" (")
-                    val cityField = allCitiesArray!!.find { it.name == villeTmp && it.zip_code == cpTmp.substring(0, cpTmp.length - 1) }
+                } else {
+                    val (villeTmp, cpTmp) = combo.selectedItem!!.toString().split(" (")
+                    val cityField = allCitiesArray!!.find {
+                        it.name == villeTmp && it.zip_code == cpTmp.substring(
+                            0,
+                            cpTmp.length - 1
+                        )
+                    }
                     if (cityField != null) {
                         lat = cityField.gps_lat
                         lon = cityField.gps_lng
-                    }
-                    else {
+                    } else {
                         searchPanel.border = BorderFactory.createTitledBorder("Search (Please select a city)")
                         return@addActionListener
                     }
@@ -198,6 +239,7 @@ private class ComboKeyHandler(private val comboBox: JComboBox<String>) : KeyAdap
                     return
                 }
             }
+
             KeyEvent.VK_ENTER -> {
                 if (!list.contains(text)) {
                     list.add(text)
@@ -206,6 +248,7 @@ private class ComboKeyHandler(private val comboBox: JComboBox<String>) : KeyAdap
                 }
                 shouldHide = true
             }
+
             KeyEvent.VK_ESCAPE -> shouldHide = true
             // else -> {}
         }

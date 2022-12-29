@@ -9,5 +9,7 @@ data class Filters (
     var gplc: Boolean = false,
     var Toilet: Boolean = false,
     var FoodStore: Boolean = false,
-    var InflationStation : Boolean = false
+    var InflationStation : Boolean = false,
+    var json: Boolean = false,
+    var xml: Boolean = false
 )
