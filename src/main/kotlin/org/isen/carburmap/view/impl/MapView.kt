@@ -82,25 +82,28 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
 
     override fun propertyChange(evt: PropertyChangeEvent?) {
         if(evt?.propertyName == ICarburMapModel.DataType.Stations.toString()) {
-            if (evt.newValue !is StationsList) return
             synchronized(map) {
-                (evt.newValue as StationsList).stations.forEach {
-                    val markerIcon = MapMarkerStation(it, "./img/gas-station.png")
-                    map.addMapMarker(markerIcon)
-                    model.addElement(markerIcon)
-                }
-                if(evt.oldValue == null) return
-                (evt.oldValue as StationsList).stations.forEach { station ->
-                    val toRemove = map.mapMarkerList.filter { (it is MapMarkerStation) && (it.station == station) }
-                    map.mapMarkerList.removeAll(toRemove.toSet())
-                    if (controller.model is DefaultCarburmapModel) {
-                        controller.model.selectedMapMarkerStation = null
+                if(evt.newValue != null && evt.newValue is StationsList) {
+                    (evt.newValue as StationsList).stations.forEach {
+                        val markerIcon = MapMarkerStation(it, "./img/gas-station.png")
+                        map.addMapMarker(markerIcon)
+                        model.addElement(markerIcon)
                     }
-                    toRemove.forEach(model::removeElement)
                 }
-
+                if(evt.oldValue != null && evt.oldValue is StationsList) {
+                    (evt.oldValue as StationsList).stations.forEach { station ->
+                        val toRemove = map.mapMarkerList.filter { (it is MapMarkerStation) && (it.station == station) }
+                        map.mapMarkerList.removeAll(toRemove.toSet())
+                        map.repaint()
+                        if (controller.model is DefaultCarburmapModel) {
+                            controller.model.selectedMapMarkerStation = null
+                        }
+                        toRemove.forEach(model::removeElement)
+                    }
+                }
             }
         }
+
         if (evt?.propertyName == ICarburMapModel.DataType.SelectedStation.toString()) {
             if (evt.newValue !is MapMarkerStation) return
             synchronized(map) {
@@ -195,6 +198,7 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
                 renderer.border = if (cellHasFocus) focusBorder else noFocusBorder
                 if (isSelected) {
                     icon.icon = ImageIcon(value.selectedIcon.image)
+                    renderer.border = focusBorder
                     renderer.foreground = list.selectionForeground
                     renderer.background = list.selectionBackground
                     renderer.isOpaque = true
@@ -206,6 +210,7 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
                     icon.icon = ImageIcon(value.img.image)
                     renderer.foreground = list.foreground
                     renderer.background = list.background
+                    renderer.border = noFocusBorder
                     renderer.isOpaque = false
                 }
                 fieldComp["address"]?.text = value.station.adresse

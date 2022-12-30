@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule
 import com.fasterxml.jackson.dataformat.xml.XmlMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.httpGet
 import com.google.gson.Gson
 import org.apache.logging.log4j.kotlin.Logging
@@ -20,8 +19,6 @@ import java.beans.PropertyChangeListener
 import java.beans.PropertyChangeSupport
 import kotlin.properties.Delegates
 import org.isen.carburmap.lib.filedl.FileDownloader
-import org.isen.carburmap.lib.key.CustomKeyStore
-import java.net.URL
 
 internal val kotlinXmlMapper = XmlMapper(JacksonXmlModule().apply {
     setDefaultUseWrapper(false)
@@ -69,7 +66,6 @@ class DefaultCarburmapModel : ICarburMapModel {
      * @return the list of stations in a radius of distance from your position
      */
     override fun findStationByJSON(lat:Double, lon:Double, filters:Filters) {
-        CustomKeyStore.customKeyStore()
             "https://data.economie.gouv.fr//api/records/1.0/search/?dataset=prix-carburants-fichier-instantane-test-ods-copie&q=&rows=-1&geofilter.distance=$lat%2C+$lon%2C+10000"
             .httpGet()
             .responseObject(StationsListJSON.Deserializer()) { request, response, result ->
@@ -82,7 +78,6 @@ class DefaultCarburmapModel : ICarburMapModel {
                     logger.warn("Be careful data is void $error")
                 }
             }
-        FuelManager.instance.reset()
     }
 
     /**

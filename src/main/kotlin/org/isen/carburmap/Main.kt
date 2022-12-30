@@ -1,15 +1,13 @@
 package org.isen.carburmap
 
-import com.github.kittinunf.fuel.core.FuelManager
 import org.isen.carburmap.view.impl.StartPage
 import org.isen.carburmap.model.impl.DefaultCarburmapModel
 import org.isen.carburmap.ctrl.CarburMapController
+import org.isen.carburmap.lib.key.CustomKeyStore
 import org.isen.carburmap.view.impl.MapView
-import java.security.KeyStore
-import java.security.cert.Certificate
-import java.security.cert.CertificateFactory
 
 fun main() {
+    CustomKeyStore.customKeyStore()
     val model = DefaultCarburmapModel()
     val controller = CarburMapController(model)
     val mapView = MapView(controller)
