@@ -8,7 +8,7 @@ import java.io.IOException
 
 class FileDownloader {
     companion object {
-        fun a(name : String, link : String) {
+        fun download(name : String, link : String) {
             val url = URL(link)
             val path = Paths.get("src/main/resources/$name")
             try {
