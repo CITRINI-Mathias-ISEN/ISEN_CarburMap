@@ -16,7 +16,7 @@ import javax.swing.*
 
 class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView {
     // Search
-    private val model = DefaultCarburmapModel()
+    private val model = controller.model
     private val allCitiesArray: Array<Ville>? = model.fetchAllCities()!!
     private val array: Array<String> = allCitiesArray!!.map { "${it.name} (${it.zip_code})" }.toTypedArray()
     private val combo = JComboBox(array)
