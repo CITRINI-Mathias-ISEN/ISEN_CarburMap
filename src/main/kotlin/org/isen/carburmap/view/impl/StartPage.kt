@@ -104,16 +104,28 @@ class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView 
         methodsCheckboxArray[0].isSelected = true
         filters.json = true
         methodsCheckboxArray[0].addActionListener {
-            if (methodsCheckboxArray[0].isSelected)
+            if (methodsCheckboxArray[0].isSelected){
+                filters.json = true
+                filters.xml = false
                 methodsCheckboxArray[1].isSelected = false
-            else if (!methodsCheckboxArray[0].isSelected && !methodsCheckboxArray[1].isSelected)
+            }
+            else if (!methodsCheckboxArray[0].isSelected && !methodsCheckboxArray[1].isSelected){
+                filters.json = true
+                filters.xml = false
                 methodsCheckboxArray[0].isSelected = true
+            }
         }
         methodsCheckboxArray[1].addActionListener {
-            if (methodsCheckboxArray[1].isSelected)
+            if (methodsCheckboxArray[1].isSelected){
+                filters.json = false
+                filters.xml = true
                 methodsCheckboxArray[0].isSelected = false
-            else if (!methodsCheckboxArray[0].isSelected && !methodsCheckboxArray[1].isSelected)
-                methodsCheckboxArray[1].isSelected = true
+            }
+            else if (!methodsCheckboxArray[0].isSelected && !methodsCheckboxArray[1].isSelected){
+                filters.json = true
+                filters.xml = false
+                methodsCheckboxArray[0].isSelected = true
+            }
         }
         return methodsPanel
     }
@@ -143,34 +155,41 @@ class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView 
             //println(filters)
 
             // Search part
-            val regex = Regex("([-+]?)([\\d]{1,2})(((\\.)(\\d+)(,)))(\\s*)(([-+]?)([\\d]{1,3})((\\.)(\\d+))?)\$")
-            var lat = 0.0
-            var lon = 0.0
+            val regex = Regex("([-+]?)(\\d{1,2})((\\.)(\\d+)(,))(\\s*)(([-+]?)(\\d{1,3})((\\.)(\\d+))?)\$")
 
             if (combo.selectedItem == null)
                 searchPanel.border = BorderFactory.createTitledBorder("Search (Please select a city)")
             else {
                 if (combo.selectedItem!!.toString().matches(regex)) {
-                    lat = combo.selectedItem!!.toString().split(",")[0].toDouble()
-                    lon = combo.selectedItem!!.toString().split(",")[1].toDouble()
-                } else {
-                    val (villeTmp, cpTmp) = combo.selectedItem!!.toString().split(" (")
-                    val cityField = allCitiesArray!!.find {
-                        it.name == villeTmp && it.zip_code == cpTmp.substring(
-                            0,
-                            cpTmp.length - 1
-                        )
-                    }
-                    if (cityField != null) {
-                        lat = cityField.gps_lat
-                        lon = cityField.gps_lng
-                    } else {
-                        searchPanel.border = BorderFactory.createTitledBorder("Search (Please select a city)")
-                        return@addActionListener
-                    }
+                    val lat = combo.selectedItem!!.toString().split(",")[0].toDouble()
+                    val lon = combo.selectedItem!!.toString().split(",")[1].toDouble()
+
+                    searchPanel.border = BorderFactory.createTitledBorder("Search")
+                    controller.updateData(lat, lon, filters)
                 }
-                searchPanel.border = BorderFactory.createTitledBorder("Search")
-                controller.updateData(lat, lon, filters)
+                else {
+                    try {
+                        val (villeTmp, cpTmp) = combo.selectedItem!!.toString().split(" (")
+                        val cityField = allCitiesArray!!.find {
+                            it.name == villeTmp && it.zip_code == cpTmp.substring(
+                                0,
+                                cpTmp.length - 1
+                            )
+                        }
+                        if (cityField != null) {
+                            val lat = cityField.gps_lat
+                            val lon = cityField.gps_lng
+
+                            searchPanel.border = BorderFactory.createTitledBorder("Search")
+                            controller.updateData(lat, lon, filters)
+                        } else {
+                            searchPanel.border = BorderFactory.createTitledBorder("Search (City not found)")
+                        }
+                    } catch (e: Exception) {
+                        searchPanel.border = BorderFactory.createTitledBorder("Search (City not found)")
+                    }
+
+                }
             }
 
 
