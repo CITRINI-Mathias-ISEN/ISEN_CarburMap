@@ -33,10 +33,9 @@ class DefaultCarburmapModel : ICarburMapModel {
 
     init {
         val url = "https://donnees.roulez-eco.fr/opendata/instantane"
-        //val url = ("https://www.rpg-maker.fr/ressources/mvtile/33076_mohat_got9c_png-par-Mohat.png")
-        val name = "xml.zip"
-        FileDownloader.download(name, url)
-
+        val path = "xml/PrixCarburants_instantane.zip"
+        FileDownloader.download(path, url)
+        FileDownloader.unzip(path, "xml/")
     }
     companion object : Logging
 
@@ -93,7 +92,7 @@ class DefaultCarburmapModel : ICarburMapModel {
      */
     override fun findStationByXML(lat:Double, lon:Double, filters:Filters) {
         // Get the file from resources folder
-        val file = ClassLoader.getSystemClassLoader().getResource("./PrixCarburants_instantane.xml")
+        val file = ClassLoader.getSystemClassLoader().getResource("./xml/PrixCarburants_instantane.xml")
         val xml = file.readText()
         var data = kotlinXmlMapper.readValue(xml, StationsListXML::class.java)
         if (data != null) {
