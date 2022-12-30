@@ -18,6 +18,10 @@ import org.isen.carburmap.model.ICarburMapModel
 import java.beans.PropertyChangeListener
 import java.beans.PropertyChangeSupport
 import kotlin.properties.Delegates
+import java.net.URL
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.io.IOException
 
 internal val kotlinXmlMapper = XmlMapper(JacksonXmlModule().apply {
     setDefaultUseWrapper(false)
@@ -27,6 +31,24 @@ internal val kotlinXmlMapper = XmlMapper(JacksonXmlModule().apply {
 
 class DefaultCarburmapModel : ICarburMapModel {
 
+    init {
+        //val url = URL("https://www.data.gouv.fr/fr/datasets/r/1b2d2b0c-3b0f-4b0f-8f3c-8f3c2b0c3b0f")
+        val url = URL("https://www.rpg-maker.fr/ressources/mvtile/33076_mohat_got9c_png-par-Mohat.png")
+        val path = Paths.get("src/main/resources/test.png")
+        try {
+            Files.delete(path)
+            println("Deletion succeeded.")
+        } catch (e: IOException) {
+            println("Deletion failed.")
+            //e.printStackTrace()
+        }
+        try {
+            url.openStream().use { Files.copy(it, path) }
+        }
+        catch (e: Exception) {
+            println("Error: $e")
+        }
+    }
     companion object : Logging
 
     private val pcs = PropertyChangeSupport(this)
