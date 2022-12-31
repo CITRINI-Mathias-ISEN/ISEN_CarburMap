@@ -4,6 +4,7 @@ import org.apache.logging.log4j.kotlin.Logging
 import org.isen.carburmap.ctrl.CarburMapController
 import org.isen.carburmap.data.Prix
 import org.isen.carburmap.data.StationsList
+import org.isen.carburmap.lib.icon.IconManager
 import org.isen.carburmap.lib.marker.MapMarkerStation
 import org.isen.carburmap.lib.routing.MapPath
 import org.isen.carburmap.lib.routing.RoutingEngine
@@ -32,7 +33,7 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
             super.updateUI()
             layoutOrientation = VERTICAL
             visibleRowCount = 0
-            border = BorderFactory.createEmptyBorder(5, 10, 5, 10)
+            border = BorderFactory.createEmptyBorder(5, 10, 15, 10)
             cellRenderer = ListStationListCellRenderer(controller)
             selectionModel.selectionMode = ListSelectionModel.MULTIPLE_INTERVAL_SELECTION
         }
@@ -135,13 +136,12 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
         private val box: Box = Box.createVerticalBox()
         private val prixList: JList<Prix> = object : JList<Prix>() {
             override fun updateUI() {
-                selectionForeground = null
-                selectionBackground = null
-                cellRenderer = null
                 super.updateUI()
+                isOpaque = true
+                background = Color.WHITE
                 layoutOrientation = HORIZONTAL_WRAP
                 visibleRowCount = 0
-                border = BorderFactory.createEmptyBorder(5, 10, 5, 10)
+                border = BorderFactory.createEmptyBorder(5, 0, 5, 10)
                 cellRenderer = PrixListCellRenderer()
                 selectionModel.selectionMode = ListSelectionModel.MULTIPLE_INTERVAL_SELECTION
             }
@@ -152,16 +152,20 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
             icon.maximumSize = Dimension(32, 32)
             renderer.border = noFocusBorder
             renderer.isOpaque = true
-            renderer.border = BorderFactory.createEmptyBorder(2, 2, 2, 2)
+            renderer.border = BorderFactory.createEmptyBorder(2, 0, 2, 10)
             renderer.add(icon, BorderLayout.WEST)
-            val globalBox: Box = Box.createVerticalBox()
             box.add(makeGridBagLayoutPanel("address","Addresse :" , JLabel("")))
             box.add(makeGridBagLayoutPanel("city","Ville :" , JLabel("")))
             box.add(makeGridBagLayoutPanel("cp","Code postal :" , JLabel("")))
             val listPanel = JPanel(BorderLayout())
-            listPanel.add(prixList, BorderLayout.CENTER)
-            globalBox.add(box)
-            globalBox.add(listPanel)
+            listPanel.add(prixList)
+            listPanel.isOpaque = true
+            val globalBox: JPanel = JPanel().apply {
+                layout = BorderLayout()
+                add(box, BorderLayout.CENTER)
+                add(listPanel, BorderLayout.SOUTH)
+                isOpaque = true
+            }
             renderer.add(globalBox, BorderLayout.CENTER)
         }
 
@@ -231,27 +235,44 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
         private val label = JLabel("", SwingConstants.CENTER)
         private val focusBorder = UIManager.getBorder("List.focusCellHighlightBorder")
         private val noFocusBorder = UIManager.getBorder("List.noFocusBorder")
+        private val iconManager = IconManager.getInstance()
 
         init {
-            label.foreground = renderer.foreground
-            label.background = renderer.background
-            label.isOpaque = false
-            label.border = noFocusBorder
             renderer.isOpaque = false
-            renderer.border = BorderFactory.createEmptyBorder(2, 2, 2, 2)
-            renderer.add(label)
+            renderer.border = BorderFactory.createEmptyBorder(0, 0, 0, 0)
         }
 
         override fun getListCellRendererComponent(
             list: JList<out Prix>?,
-            value: Prix?,
+            value: Prix,
             index: Int,
             isSelected: Boolean,
             cellHasFocus: Boolean
         ): Component {
-            if (value == null) return renderer
-            label.text = "${value.carburant} : ${value.valeur}€"
-            return renderer
+            val panel = JPanel(BorderLayout())
+
+            val image = iconManager.getSimpleIcon("./img/Gas/" + value.carburant + ".png", 32)
+            val icon = JLabel(null as? Icon?, SwingConstants.CENTER)
+            icon.icon = ImageIcon(image.image)
+            icon.border = BorderFactory.createEmptyBorder(0, 0, 0, 10)
+            panel.border = BorderFactory.createEmptyBorder(5, 1, 0, 10)
+            panel.add(icon, BorderLayout.WEST)
+
+            val namePanel = JPanel(BorderLayout())
+            namePanel.isOpaque = false
+
+
+            val nameLabel = JLabel("<html><b>${value.carburant}</b></html>")
+            nameLabel.isOpaque = false
+            nameLabel.horizontalAlignment = JLabel.RIGHT
+            namePanel.add(nameLabel, BorderLayout.CENTER)
+
+            val priceLabel = JLabel("${value.valeur} €")
+            namePanel.add(priceLabel, BorderLayout.SOUTH)
+            panel.add(namePanel, BorderLayout.CENTER)
+            panel.isOpaque = false
+
+            return panel
         }
 
     }
