@@ -5,6 +5,8 @@ import javax.imageio.ImageIO
 
 class IconManager private constructor() {
     private val iconMaps: MutableMap<String, Icon> = mutableMapOf()
+
+    private val simpleIconMaps: MutableMap<String, SimpleIcon> = mutableMapOf()
     companion object {
         private var INSTANCE: IconManager? = null
         fun getInstance(): IconManager {
@@ -17,6 +19,7 @@ class IconManager private constructor() {
 
     init {
         getIcon("./img/missing.png")
+        getSimpleIcon("./img/missing.png", 32)
         INSTANCE = this
     }
 
@@ -35,5 +38,22 @@ class IconManager private constructor() {
             e.printStackTrace()
         }
         return iconMaps["./img/missing.png"]!!
+    }
+
+    fun getSimpleIcon(path: String, size: Int): SimpleIcon {
+        if(size <= 0) throw IllegalArgumentException("Size must be positive")
+        if (simpleIconMaps.containsKey(path+size)) {
+            return simpleIconMaps[path+size]!!
+        }
+        try {
+            val bufferedImage = ClassLoader.getSystemClassLoader().getResource(path)?.let { ImageIO.read(it) }!!
+            val img = bufferedImage.getScaledInstance(size,size, Image.SCALE_SMOOTH)
+            val simpleIcon = SimpleIcon(path, path.split('/').last(), img, size)
+            simpleIconMaps[path+size] = simpleIcon
+            return simpleIcon
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return simpleIconMaps["./img/missing.png"+32]!!
     }
 }
