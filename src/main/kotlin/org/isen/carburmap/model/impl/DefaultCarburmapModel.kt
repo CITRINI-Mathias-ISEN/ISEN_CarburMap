@@ -50,7 +50,7 @@ class DefaultCarburmapModel : ICarburMapModel {
     private var villesList : Array<Ville>? by Delegates.observable(null) {
             _, oldValue, newValue ->
         logger.info("stationInformation updated")
-        pcs.firePropertyChange(ICarburMapModel.DataType.Stations.toString(), oldValue, newValue)
+        pcs.firePropertyChange(ICarburMapModel.DataType.VillesList.toString(), oldValue, newValue)
     }
 
     var selectedMapMarkerStation: MapMarkerStation? by Delegates.observable(null) {
