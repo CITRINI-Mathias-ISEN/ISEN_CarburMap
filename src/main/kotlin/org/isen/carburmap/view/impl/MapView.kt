@@ -84,13 +84,6 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
     override fun propertyChange(evt: PropertyChangeEvent?) {
         if(evt?.propertyName == ICarburMapModel.DataType.Stations.toString()) {
             synchronized(map) {
-                if(evt.newValue != null && evt.newValue is StationsList) {
-                    (evt.newValue as StationsList).stations.forEach {
-                        val markerIcon = MapMarkerStation(it, "./img/gas-station.png")
-                        map.addMapMarker(markerIcon)
-                        model.addElement(markerIcon)
-                    }
-                }
                 if(evt.oldValue != null && evt.oldValue is StationsList) {
                     (evt.oldValue as StationsList).stations.forEach { station ->
                         val toRemove = map.mapMarkerList.filter { (it is MapMarkerStation) && (it.station == station) }
@@ -100,6 +93,13 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
                             controller.model.selectedMapMarkerStation = null
                         }
                         toRemove.forEach(model::removeElement)
+                    }
+                }
+                if(evt.newValue != null && evt.newValue is StationsList) {
+                    (evt.newValue as StationsList).stations.forEach {
+                        val markerIcon = MapMarkerStation(it, "./img/gas-station.png")
+                        map.addMapMarker(markerIcon)
+                        model.addElement(markerIcon)
                     }
                 }
             }
@@ -163,6 +163,7 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
             val globalBox: JPanel = JPanel().apply {
                 layout = BorderLayout()
                 add(box, BorderLayout.CENTER)
+                box.maximumSize = Dimension(800, 90)
                 add(listPanel, BorderLayout.SOUTH)
                 isOpaque = true
             }
@@ -182,6 +183,7 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
             c.weightx = 1.0
             c.fill = GridBagConstraints.HORIZONTAL
             panel.add(comp, c)
+            panel.maximumSize = Dimension(800, 30)
 
             return panel
         }
