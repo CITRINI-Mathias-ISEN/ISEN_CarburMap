@@ -18,7 +18,6 @@ class CarburMapController(val model:ICarburMapModel) {
     }
 
     fun updateData(lat: Double, lon: Double, filters: Filters) {
-        model.fetchAllCities()
         if (filters.json && !filters.xml) {
             //println("JSON")
             model.findStationByJSON(lat, lon, filters)

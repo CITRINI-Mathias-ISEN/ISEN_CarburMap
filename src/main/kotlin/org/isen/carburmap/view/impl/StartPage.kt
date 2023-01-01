@@ -2,25 +2,21 @@ package org.isen.carburmap.view.impl
 
 import org.isen.carburmap.ctrl.CarburMapController
 import org.isen.carburmap.data.Filters
-import org.isen.carburmap.data.Ville
-import org.isen.carburmap.model.impl.DefaultCarburmapModel
+import org.isen.carburmap.data.SearchData
+import org.isen.carburmap.lib.geo.GeoCode
 import org.isen.carburmap.view.ICarburMapView
-import java.awt.BorderLayout
-import java.awt.Dimension
-import java.awt.EventQueue
-import java.awt.GridLayout
+import java.awt.*
 import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
 import java.beans.PropertyChangeEvent
-import java.util.*
 import javax.swing.*
 
 class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView {
     // Search
     private val model = controller.model
-    private val allCitiesArray: Array<Ville>? = model.fetchAllCities()!!
-    private val array: Array<String> = allCitiesArray!!.map { "${it.name} (${it.zip_code})" }.toTypedArray()
-    private val combo = JComboBox(array)
+    private val allCitiesArray: Array<SearchData>? = model.fetchAllCities()!!
+    private val combo = JComboBox(allCitiesArray)
+
 
     private val searchPanel = JPanel(BorderLayout())
 
@@ -170,16 +166,11 @@ class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView 
                 }
                 else {
                     try {
-                        val (villeTmp, cpTmp) = combo.selectedItem!!.toString().split(" (")
-                        val cityField = allCitiesArray!!.find {
-                            it.name == villeTmp && it.zip_code == cpTmp.substring(
-                                0,
-                                cpTmp.length - 1
-                            )
-                        }
+                        val villeTmp = combo.selectedItem!!.toString()
+                        val cityField : SearchData? = if(combo.selectedItem is SearchData) combo.selectedItem as SearchData else allCitiesArray!!.find { it.displayName == villeTmp }
                         if (cityField != null) {
-                            val lat = cityField.gps_lat
-                            val lon = cityField.gps_lng
+                            val lat = cityField.lat
+                            val lon = cityField.lon
 
                             searchPanel.border = BorderFactory.createTitledBorder("Search")
                             controller.updateData(lat, lon, filters)
@@ -219,8 +210,11 @@ class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView 
 
 }
 
-private class ComboKeyHandler(private val comboBox: JComboBox<String>) : KeyAdapter() {
-    private val list = mutableListOf<String>()
+private class ComboKeyHandler(private val comboBox: JComboBox<SearchData>) : KeyAdapter() {
+    private val list = mutableListOf<SearchData>()
+    private var extraSearchData: Pair<String, List<SearchData>?> = Pair("", mutableListOf<SearchData>())
+    private val geoCode = GeoCode()
+
     private var shouldHide = false
 
     init {
@@ -254,19 +248,18 @@ private class ComboKeyHandler(private val comboBox: JComboBox<String>) : KeyAdap
         shouldHide = false
         when (e.keyCode) {
             KeyEvent.VK_RIGHT -> for (s in list) {
-                if (s.startsWith(text)) {
-                    textField.text = s
+                if (s.displayName.startsWith(text)) {
+                    textField.text = s.displayName
                     return
                 }
             }
 
             KeyEvent.VK_ENTER -> {
-                if (!list.contains(text)) {
-                    list.add(text)
-                    list.sort()
-                    setSuggestionModel(comboBox, getSuggestedModel(list, text), text)
+                val geoCodeResult = geoCode.getFromAddress(text)
+                if(geoCodeResult.isNotEmpty()) {
+                    extraSearchData = Pair(text.lowercase(), geoCodeResult.map { it.toSearchData() })
                 }
-                shouldHide = true
+                shouldHide = false
             }
 
             KeyEvent.VK_ESCAPE -> shouldHide = true
@@ -274,18 +267,20 @@ private class ComboKeyHandler(private val comboBox: JComboBox<String>) : KeyAdap
         }
     }
 
-    private fun setSuggestionModel(cb: JComboBox<String>, m: ComboBoxModel<String>, txt: String) {
+    private fun setSuggestionModel(cb: JComboBox<SearchData>, m: ComboBoxModel<SearchData>, txt: String) {
         cb.model = m
         cb.selectedIndex = -1
         (cb.editor.editorComponent as? JTextField)?.text = txt
     }
 
-    private fun getSuggestedModel(list: List<String>, text: String): ComboBoxModel<String> {
-        val m = DefaultComboBoxModel<String>()
+    private fun getSuggestedModel(list: List<SearchData>, text: String): ComboBoxModel<SearchData> {
+        val m = DefaultComboBoxModel<SearchData>()
+        if(extraSearchData.first == text.lowercase()) {
+            extraSearchData.second?.forEach { m.addElement(it) }
+        }
         for (s in list) {
-            // s en minuscule
 
-            if (s.lowercase().contains(text.lowercase())) {
+            if (s.displayName.lowercase().contains(text.lowercase())) {
                 m.addElement(s)
             }
         }

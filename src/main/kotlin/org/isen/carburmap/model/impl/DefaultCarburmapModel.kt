@@ -48,7 +48,7 @@ class DefaultCarburmapModel : ICarburMapModel {
         pcs.firePropertyChange(ICarburMapModel.DataType.Stations.toString(), oldValue, newValue)
     }
 
-    private var villesList : Array<Ville>? by Delegates.observable(null) {
+    private var villesList : Array<SearchData>? by Delegates.observable(null) {
             _, oldValue, newValue ->
         logger.info("stationInformation updated")
         pcs.firePropertyChange(ICarburMapModel.DataType.VillesList.toString(), oldValue, newValue)
@@ -100,7 +100,7 @@ class DefaultCarburmapModel : ICarburMapModel {
             println("File not found")
         }
         val xml = file.readText()
-        var data = kotlinXmlMapper.readValue(xml, StationsListXML::class.java)
+        val data = kotlinXmlMapper.readValue(xml, StationsListXML::class.java)
         if (data != null) {
             val geoDistanceHelper = GeoDistanceHelper(lat, lon)
             data.pdv = data.pdv.filter{ geoDistanceHelper.calculate(it.latitude / 100000, it.longitude / 100000) < 10000.0 } as ArrayList<Pdv>
@@ -112,14 +112,15 @@ class DefaultCarburmapModel : ICarburMapModel {
         }
     }
 
-     override fun fetchAllCities() : Array<Ville>? {
+     override fun fetchAllCities() : Array<SearchData>? {
+         val content = ClassLoader.getSystemClassLoader().getResource("./cities.json")?.readText(Charsets.UTF_8)
 
-        val content = ClassLoader.getSystemClassLoader().getResource("./cities.json")?.readText(Charsets.UTF_8)
+         val gson = Gson()
+         val villes = gson.fromJson(content, Array<Ville>::class.java)
+         villesList = villes.map { SearchData(id = it.id, displayName = "${it.name} (${it.zip_code})", cp = it.zip_code, lat = it.gps_lat, lon = it.gps_lng) }.toTypedArray()
 
-        val gson = Gson()
-        villesList = gson.fromJson(content, Array<Ville>::class.java)
-        //println(villesList!![0].zip_code)
-        return villesList!!
+         //println(villesList!![0].zip_code)
+         return villesList!!
 
     }
 

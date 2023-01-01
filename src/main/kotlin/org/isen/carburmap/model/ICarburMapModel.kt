@@ -14,7 +14,7 @@ interface ICarburMapModel {
 
     fun findStationByXML(lat:Double, lon:Double, filters: Filters)
     fun changeCurrentSelection(id:Long)
-    fun fetchAllCities() : Array<Ville>?
+    fun fetchAllCities() : Array<SearchData>?
     fun filtrage(filters: Filters)
     fun newItinerary(routingEngineRes: ResponsePath)
 }
