@@ -17,7 +17,7 @@ class FileDownloader {
          */
         fun download(path : String, link : String) {
             val url = URL(link)
-            val filePath = Paths.get("src/main/resources/$path")
+            val filePath = Paths.get("build/resources/main/$path")
             this.delete("$path")
             try {
                 url.openStream().use { Files.copy(it, filePath) }
@@ -33,18 +33,21 @@ class FileDownloader {
          * @param destDir the path of the destination folder
          */
         fun unzip(srcZip : String, destDir: String) {
-            val zipPath = Paths.get("src/main/resources/$srcZip")
-            val destPath = Paths.get("src/main/resources/$destDir")
+            val zipPath = Paths.get("build/resources/main/$srcZip")
+            val destPath = Paths.get("build/resources/main/$destDir")
             val zipFile = ZipFile(zipPath.toFile()).use { zip ->
                 zip.entries().asSequence().forEach { entry ->
                     zip.getInputStream(entry).use { input ->
-                        val outPath = Paths.get("src/main/resources/$destDir/${entry.name}")
+                        val outPath = Paths.get("build/resources/main/$destDir/${entry.name}")
                         try {
                             Files.copy(input, outPath)
+                            println("FileDownloader - Unzipped $outPath")
                         }
                         catch (e: Exception) {
-                            this.delete("$destDir/${entry.name}")
+                            println("FileDownloader - ${entry.name} already exists, overwriting")
+                            this.delete("$destDir${entry.name}")
                             Files.copy(input, outPath)
+                            println("FileDownloader - ${entry.name} has been overwritten")
                         }
                     }
                 }
@@ -56,13 +59,20 @@ class FileDownloader {
          * @param path the path of the file to delete (in "/ressources/" folder) ( ex: "xml/PrixCarburants_instantane.zip" )
          */
         fun delete(src : String) {
-            val filePath = Paths.get("src/main/resources/$src")
-            try {
-                Files.delete(filePath)
-                println("Deletion succeeded.")
-            } catch (e: IOException) {
-                println("Deletion failed.")
-                //e.printStackTrace()
+            val filePath = Paths.get("build/resources/main/$src")
+            // check if file exists
+            if (Files.exists(filePath)) {
+                try {
+                    try {
+                        Files.delete(filePath)
+                        println("FileDownloader - Deletion of $src succeeded.")
+                    } catch (e: IOException) {
+                        println("FileDownloader - Error while deleting $src: $e")
+                    }
+                }
+                catch (e: Exception) {
+                    println("FileDownloader - Error while deleting $src: $e")
+                }
             }
         }
     }

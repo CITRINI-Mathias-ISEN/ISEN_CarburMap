@@ -88,6 +88,9 @@ class DefaultCarburmapModel : ICarburMapModel {
     override fun findStationByXML(lat:Double, lon:Double, filters:Filters) {
         // Get the file from resources folder
         val file = ClassLoader.getSystemClassLoader().getResource("./xml/PrixCarburants_instantane.xml")
+        if (file == null) {
+            println("File not found")
+        }
         val xml = file.readText()
         var data = kotlinXmlMapper.readValue(xml, StationsListXML::class.java)
         if (data != null) {
