@@ -12,6 +12,7 @@ import java.awt.GridLayout
 import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
 import java.beans.PropertyChangeEvent
+import java.util.*
 import javax.swing.*
 
 class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView {
@@ -282,7 +283,9 @@ private class ComboKeyHandler(private val comboBox: JComboBox<String>) : KeyAdap
     private fun getSuggestedModel(list: List<String>, text: String): ComboBoxModel<String> {
         val m = DefaultComboBoxModel<String>()
         for (s in list) {
-            if (s.startsWith(text)) {
+            // s en minuscule
+
+            if (s.lowercase().contains(text.lowercase())) {
                 m.addElement(s)
             }
         }
