@@ -7,7 +7,6 @@ import org.isen.carburmap.data.StationsList
 import org.isen.carburmap.lib.icon.IconManager
 import org.isen.carburmap.lib.marker.MapMarkerStation
 import org.isen.carburmap.lib.routing.MapPath
-import org.isen.carburmap.lib.routing.RoutingEngine
 import org.isen.carburmap.model.ICarburMapModel
 import org.isen.carburmap.model.impl.DefaultCarburmapModel
 import org.isen.carburmap.view.ICarburMapView
@@ -59,9 +58,6 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
     }
 
     private fun createStationMapPanel(): Component {
-        //TODO: supprimer l'exemple
-        val routingEngineRes = RoutingEngine.getInstance().getPathCar(43.56345578807291, 4.0916781735807675, 43.60554813079337, 3.87394831667493)
-        map.addMapPolygon(MapPath(routingEngineRes))
         return JScrollPane(map)
     }
 
@@ -120,7 +116,29 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
                         map.removeMapMarker(it)
                         it.isSelected = true
                         map.addMapMarker(it)
-                        list.scrollRectToVisible(list.getCellBounds(model.indexOf(it), model.indexOf(it)))
+                        val rectangle: Rectangle = model.indexOf(it).let { index ->
+                            list.getCellBounds(index, index)
+                        }
+                        list.scrollRectToVisible(rectangle)
+                    }
+                }
+            }
+        }
+
+        if (evt?.propertyName == ICarburMapModel.DataType.Itinerary.toString()) {
+            synchronized(map) {
+                if(evt.oldValue != null) {
+                    evt.oldValue?.let {
+                        if (it is MapPath) {
+                            map.removeMapPolygon(it)
+                        }
+                    }
+                }
+                if(evt.newValue!=null) {
+                    evt.newValue?.let {
+                        if (it is MapPath) {
+                            map.addMapPolygon(it)
+                        }
                     }
                 }
             }

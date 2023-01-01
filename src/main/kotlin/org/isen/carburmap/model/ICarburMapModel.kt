@@ -1,11 +1,12 @@
 package org.isen.carburmap.model
 
+import com.graphhopper.ResponsePath
 import org.isen.carburmap.data.*
 import java.beans.PropertyChangeListener
 
 interface ICarburMapModel {
     enum class DataType {
-        Stations, SelectedStation, VillesList
+        Stations, SelectedStation, VillesList, Itinerary
     }
     fun register(datatype:DataType,listener:PropertyChangeListener)
     fun unregister(listener:PropertyChangeListener)
@@ -15,4 +16,5 @@ interface ICarburMapModel {
     fun changeCurrentSelection(id:Long)
     fun fetchAllCities() : Array<Ville>?
     fun filtrage(filters: Filters)
+    fun newItinerary(routingEngineRes: ResponsePath)
 }

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.github.kittinunf.fuel.httpGet
 import com.google.gson.Gson
+import com.graphhopper.ResponsePath
 import org.apache.logging.log4j.kotlin.Logging
 import org.isen.carburmap.data.*
 import org.isen.carburmap.data.json.StationsListJSON
@@ -19,6 +20,7 @@ import java.beans.PropertyChangeListener
 import java.beans.PropertyChangeSupport
 import kotlin.properties.Delegates
 import org.isen.carburmap.lib.filedl.FileDownloader
+import org.isen.carburmap.lib.routing.MapPath
 
 internal val kotlinXmlMapper = XmlMapper(JacksonXmlModule().apply {
     setDefaultUseWrapper(false)
@@ -56,6 +58,12 @@ class DefaultCarburmapModel : ICarburMapModel {
             _, oldValue, newValue ->
         logger.info("update selectedStation $newValue")
         pcs.firePropertyChange(ICarburMapModel.DataType.SelectedStation.toString(), oldValue, newValue)
+    }
+
+    var itinerary: MapPath? by Delegates.observable(null) {
+            _, oldValue, newValue ->
+        logger.info("update itinerary $newValue")
+        pcs.firePropertyChange(ICarburMapModel.DataType.Itinerary.toString(), oldValue, newValue)
     }
 
     /**
@@ -168,6 +176,11 @@ class DefaultCarburmapModel : ICarburMapModel {
         }
         //stationsList!!.stations.forEach { println(it) }
 
+    }
+
+    override fun newItinerary(routingEngineRes: ResponsePath) {
+        val path = MapPath(routingEngineRes)
+        itinerary = path
     }
 
 }

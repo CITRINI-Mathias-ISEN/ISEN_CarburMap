@@ -17,4 +17,5 @@ fun main() {
     controller.registerViewToCarburMapData(filterView)
 
     controller.displayViews()
+    controller.newItinerary(43.56345578807291, 4.0916781735807675, 43.60554813079337, 3.87394831667493)
 }

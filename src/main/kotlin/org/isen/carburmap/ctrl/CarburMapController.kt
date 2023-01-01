@@ -2,6 +2,7 @@ package org.isen.carburmap.ctrl
 
 import org.apache.logging.log4j.kotlin.logger
 import org.isen.carburmap.data.Filters
+import org.isen.carburmap.lib.routing.RoutingEngine
 import org.isen.carburmap.model.ICarburMapModel
 import org.isen.carburmap.view.ICarburMapView
 
@@ -43,6 +44,12 @@ class CarburMapController(val model:ICarburMapModel) {
             this.model.register(ICarburMapModel.DataType.Stations, v)
             this.model.register(ICarburMapModel.DataType.VillesList, v)
             this.model.register(ICarburMapModel.DataType.SelectedStation, v)
+            this.model.register(ICarburMapModel.DataType.Itinerary, v)
         }
+    }
+
+    fun newItinerary(startLat: Double, startLon: Double, endLat: Double, endLon: Double) {
+        val routingEngineRes = RoutingEngine.getInstance().getPathCar(startLat, startLon, endLat, endLon)
+        model.newItinerary(routingEngineRes)
     }
 }
