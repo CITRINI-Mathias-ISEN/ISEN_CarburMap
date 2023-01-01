@@ -2,11 +2,15 @@ package org.isen.carburmap.lib.geo
 
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
+import org.isen.carburmap.data.SearchData
 import java.util.concurrent.TimeUnit
 
 class GeoCode {
-    fun getLatLonFromAddress(address: String): List<GeoCodeResult> {
-        val client = OkHttpClient.Builder().connectTimeout(10, TimeUnit.SECONDS).readTimeout(10, TimeUnit.SECONDS).build()
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(10, TimeUnit.SECONDS)
+        .build()
+    fun getFromAddress(address: String): List<GeoCodeResult> {
         val request = okhttp3.Request.Builder()
             .url("https://nominatim.openstreetmap.org/search?q=$address&format=json&dedupe=0&countrycodes=Fr&polygon_threshold=0.0005") //&polygon_geojson=1 pour récup les poly
             .build()
@@ -23,7 +27,19 @@ class GeoCodeResult {
     var osm_type: String? = null
     var osm_id: Long = 0
     var boundingbox: Array<String>? = null
-    var lat: Double? = null
-    var lon: Double? = null
-    var display_name: String? = null
+    var lat: Double = 0.0
+    var lon: Double = 0.0
+    var display_name: String = "No name"
+
+    fun toSearchData(): SearchData {
+        return SearchData(
+            id = place_id,
+            displayName = display_name,
+            lat = lat,
+            lon = lon,
+            cp = null,
+            isGeoCodeResult = true,
+            geoCodeResult = this
+        )
+    }
 }

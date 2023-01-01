@@ -6,7 +6,7 @@ class GeoCodeTest{
     @Test
     fun testGetLatLonFromAddress(){
         val geoCode = GeoCode()
-        val latLon = geoCode.getLatLonFromAddress("Isen Toulon")
+        val latLon = geoCode.getFromAddress("Isen Toulon")
         latLon.forEach {
             println("Lat: ${it.lat} Lon: ${it.lon} Display name: ${it.display_name}")
         }
