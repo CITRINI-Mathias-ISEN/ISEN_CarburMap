@@ -182,7 +182,6 @@ class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView 
             // Methods part
             filters.json = (methodsPanel.components[0] as JCheckBox).isSelected
             filters.xml = (methodsPanel.components[1] as JCheckBox).isSelected
-            //println(filters)
 
             // Search part
             val res = checkSearch(combo, searchPanel)
