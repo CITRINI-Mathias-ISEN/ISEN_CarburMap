@@ -1,6 +1,5 @@
 package org.isen.carburmap.model.impl
 
-import org.isen.carburmap.lib.geo.GeoDistanceHelper
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule
@@ -14,13 +13,19 @@ import org.isen.carburmap.data.*
 import org.isen.carburmap.data.json.StationsListJSON
 import org.isen.carburmap.data.xml.Pdv
 import org.isen.carburmap.data.xml.StationsListXML
+import org.isen.carburmap.lib.filedl.FileDownloader
+import org.isen.carburmap.lib.geo.GeoDistanceHelper
 import org.isen.carburmap.lib.marker.MapMarkerStation
+import org.isen.carburmap.lib.routing.MapPath
 import org.isen.carburmap.model.ICarburMapModel
+import org.locationtech.jts.geom.Coordinate
+import org.locationtech.jts.geom.Polygon
+import org.openstreetmap.gui.jmapviewer.interfaces.MapPolygon
+import java.awt.geom.*
 import java.beans.PropertyChangeListener
 import java.beans.PropertyChangeSupport
 import kotlin.properties.Delegates
-import org.isen.carburmap.lib.filedl.FileDownloader
-import org.isen.carburmap.lib.routing.MapPath
+
 
 internal val kotlinXmlMapper = XmlMapper(JacksonXmlModule().apply {
     setDefaultUseWrapper(false)
@@ -60,7 +65,64 @@ class DefaultCarburmapModel : ICarburMapModel {
     var itinerary: MapPath? by Delegates.observable(null) {
             _, oldValue, newValue ->
         logger.info("update itinerary $newValue")
+        itinerary?.let { getPolygone(it) }
         pcs.firePropertyChange(ICarburMapModel.DataType.Itinerary.toString(), oldValue, newValue)
+    }
+
+    fun getPolygone(path : MapPath) {
+        val points = path.points
+        // Draw a line around the path
+        val area = Area()
+        // For each 10 points, draw a line
+        for (i in 0 until points.size - 1 step 10) {
+            val point1: Point2D = Point2D.Double(points[i].lat * 100000, points[i].lon * 100000)
+            val point2: Point2D = Point2D.Double(points[i + 1].lat * 100000, points[i + 1].lon * 100000)
+            val ln = Line2D.Double(point1.getX(), point1.getY(), point2.getX(), point2.getY())
+            val indent = 15.0 // distance from central line
+            val length = ln.p1.distance(ln.p2)
+            val dx_li = (ln.getX2() - ln.getX1()) / length * indent
+            val dy_li = (ln.getY2() - ln.getY1()) / length * indent
+
+            // moved p1 point
+            val p1X = ln.getX1() - dx_li
+            val p1Y = ln.getY1() - dy_li
+
+            // line moved to the left
+            val lX1 = ln.getX1() - dy_li
+            val lY1 = ln.getY1() + dx_li
+            val lX2 = ln.getX2() - dy_li
+            val lY2 = ln.getY2() + dx_li
+
+            // moved p2 point
+            val p2X = ln.getX2() + dx_li
+            val p2Y = ln.getY2() + dy_li
+
+            // line moved to the right
+            val rX1_ = ln.getX1() + dy_li
+            val rY1 = ln.getY1() - dx_li
+            val rX2 = ln.getX2() + dy_li
+            val rY2 = ln.getY2() - dx_li
+            val p: Path2D = Path2D.Double()
+            p.moveTo(lX1, lY1)
+            p.lineTo(lX2, lY2)
+            p.lineTo(p2X, p2Y)
+            p.lineTo(rX2, rY2)
+            p.lineTo(rX1_, rY1)
+            p.lineTo(p1X, p1Y)
+            p.lineTo(lX1, lY1)
+            area.add(Area(p))
+        }
+        // Transform area to polygon
+        val pathIterator = area.getPathIterator(null)
+        val coords = DoubleArray(6)
+        val polygon = java.awt.Polygon()
+        while (!pathIterator.isDone) {
+            val type = pathIterator.currentSegment(coords)
+            if (type == PathIterator.SEG_LINETO || type == PathIterator.SEG_MOVETO) {
+                polygon.addPoint(coords[0].toInt(), coords[1].toInt())
+            }
+            pathIterator.next()
+        }
     }
 
     /**
