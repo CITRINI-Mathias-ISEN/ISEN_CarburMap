@@ -5,6 +5,7 @@ import org.isen.carburmap.data.Filters
 import org.isen.carburmap.data.SearchData
 import org.isen.carburmap.lib.geo.GeoCode
 import org.isen.carburmap.view.ICarburMapView
+import org.openstreetmap.gui.jmapviewer.Coordinate
 import java.awt.*
 import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
@@ -16,9 +17,13 @@ class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView 
     private val model = controller.model
     private val allCitiesArray: Array<SearchData>? = model.fetchAllCities()!!
     private val combo = JComboBox(allCitiesArray)
+    private val comboIti = JComboBox(allCitiesArray)
 
 
     private val searchPanel = JPanel(BorderLayout())
+
+    private val itineraryPanel = JPanel(BorderLayout())
+    private val itineraryCheckbox = JCheckBox("Utiliser un itinéraire")
 
     // Fuel
     private val fuelPanel = JPanel(GridLayout(3, 2, 2, 2))
@@ -36,6 +41,8 @@ class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView 
     private fun makeUI(): JPanel {
         box.add(makeSearchPanel())
         box.add(Box.createVerticalStrut(5))
+        box.add(makeItineraryPanel())
+        box.add(Box.createVerticalStrut(5))
         box.add(makeFuelPanel())
         box.add(Box.createVerticalStrut(5))
         box.add(makeOthersPanel())
@@ -46,7 +53,7 @@ class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView 
         return JPanel(BorderLayout()).also {
             it.add(box, BorderLayout.NORTH)
             it.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
-            it.preferredSize = Dimension(320, 325)
+            it.preferredSize = Dimension(320, 400)
         }
     }
 
@@ -61,6 +68,32 @@ class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView 
         searchPanel.add(combo, BorderLayout.NORTH)
 
         return searchPanel
+    }
+
+    private fun makeItineraryPanel(): JPanel {
+        comboIti.isEditable = false
+        comboIti.isEnabled = false
+        comboIti.selectedIndex = -1
+        val field = comboIti.editor.editorComponent
+        (field as? JTextField)?.text = ""
+        field.addKeyListener(ComboKeyHandler(comboIti))
+
+        itineraryPanel.border = BorderFactory.createTitledBorder("Itinéraire")
+        itineraryPanel.add(comboIti, BorderLayout.CENTER)
+        itineraryCheckbox.addActionListener {e ->
+            if(itineraryCheckbox.isSelected) {
+                comboIti.isEnabled = true
+                comboIti.isEditable = true
+                comboIti.selectedIndex = -1
+            } else {
+                comboIti.isEnabled = false
+                comboIti.isEditable = false
+                comboIti.selectedIndex = -1
+            }
+        }
+        itineraryPanel.add(itineraryCheckbox, BorderLayout.NORTH)
+
+        return itineraryPanel
     }
 
     private fun makeFuelPanel(): JPanel {
@@ -151,41 +184,56 @@ class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView 
             filters.xml = (methodsPanel.components[1] as JCheckBox).isSelected
 
             // Search part
-            val regex = Regex("([-+]?)(\\d{1,2})((\\.)(\\d+)(,))(\\s*)(([-+]?)(\\d{1,3})((\\.)(\\d+))?)\$")
-
-            if (combo.selectedItem == null)
-                searchPanel.border = BorderFactory.createTitledBorder("Search (Please select a city)")
-            else {
-                if (combo.selectedItem!!.toString().matches(regex)) {
-                    val lat = combo.selectedItem!!.toString().split(",")[0].toDouble()
-                    val lon = combo.selectedItem!!.toString().split(",")[1].toDouble()
-
-                    searchPanel.border = BorderFactory.createTitledBorder("Search")
-                    controller.updateData(lat, lon, filters)
+            val res = checkSearch(combo, searchPanel)
+            if(itineraryCheckbox.isSelected) {
+                //rajouter retour value pair
+                val resIt = checkSearch(comboIti, itineraryPanel)
+                if(res.first && resIt.first && res.second != null && resIt.second != null){
+                    controller.newItinerary(res.second!!.lat, res.second!!.lon, resIt.second!!.lat, resIt.second!!.lon)
+                    controller.updateData(res.second!!.lat, res.second!!.lon, filters)
                 }
-                else {
-                    try {
-                        val villeTmp = combo.selectedItem!!.toString()
-                        val cityField : SearchData? = if(combo.selectedItem is SearchData) combo.selectedItem as SearchData else allCitiesArray!!.find { it.displayName == villeTmp }
-                        if (cityField != null) {
-                            val lat = cityField.lat
-                            val lon = cityField.lon
-
-                            searchPanel.border = BorderFactory.createTitledBorder("Search")
-                            controller.updateData(lat, lon, filters)
-                        } else {
-                            searchPanel.border = BorderFactory.createTitledBorder("Search (City not found)")
-                        }
-                    } catch (e: Exception) {
-                        searchPanel.border = BorderFactory.createTitledBorder("Search (City not found)")
-                    }
-
-                }
+            } else {
+                if(res.first)
+                    controller.updateData(res.second!!.lat, res.second!!.lon, filters)
             }
 
 
         }
         return buttonPanel
+    }
+
+    private fun checkSearch(combo: JComboBox<SearchData>, searchPanel: JPanel) : Pair<Boolean, Coordinate?> {
+        val regex = Regex("([-+]?)(\\d{1,2})((\\.)(\\d+)(,))(\\s*)(([-+]?)(\\d{1,3})((\\.)(\\d+))?)\$")
+        if (combo.selectedItem == null)
+            searchPanel.border = BorderFactory.createTitledBorder("Search (Please select a city)")
+        else {
+            if (combo.selectedItem!!.toString().matches(regex)) {
+                val lat = combo.selectedItem!!.toString().split(",")[0].toDouble()
+                val lon = combo.selectedItem!!.toString().split(",")[1].toDouble()
+
+                searchPanel.border = BorderFactory.createTitledBorder("Search")
+                return Pair(true, Coordinate(lat, lon))
+            } else {
+                try {
+                    val villeTmp = combo.selectedItem!!.toString()
+                    val cityField: SearchData? =
+                        if (combo.selectedItem is SearchData) combo.selectedItem as SearchData else allCitiesArray!!.find { it.displayName == villeTmp }
+                    if (cityField != null) {
+                        val lat = cityField.lat
+                        val lon = cityField.lon
+
+                        searchPanel.border = BorderFactory.createTitledBorder("Search")
+                        return Pair(true, Coordinate(lat, lon))
+                    } else {
+                        searchPanel.border = BorderFactory.createTitledBorder("Search (City not found)")
+                    }
+                } catch (e: Exception) {
+                    searchPanel.border = BorderFactory.createTitledBorder("Search (City not found)")
+                }
+
+            }
+        }
+        return Pair(false, null)
     }
 
     override fun display() {
