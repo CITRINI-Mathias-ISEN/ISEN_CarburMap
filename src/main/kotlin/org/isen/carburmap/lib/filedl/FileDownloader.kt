@@ -1,5 +1,6 @@
 package org.isen.carburmap.lib.filedl
 
+import org.isen.carburmap.model.impl.DefaultCarburmapModel.Companion.logger
 import java.nio.file.Path
 import java.net.URL
 import java.nio.file.Files
@@ -21,9 +22,10 @@ class FileDownloader {
             this.delete("$path")
             try {
                 url.openStream().use { Files.copy(it, filePath) }
+                logger.info("$filePath downloaded")
             }
             catch (e: Exception) {
-                println("Error: $e")
+                logger.error("Error: $e")
             }
         }
 
@@ -41,13 +43,13 @@ class FileDownloader {
                         val outPath = Paths.get("build/resources/main/$destDir/${entry.name}")
                         try {
                             Files.copy(input, outPath)
-                            println("FileDownloader - Unzipped $outPath")
+                            logger.info("Unzipped $outPath")
                         }
                         catch (e: Exception) {
-                            println("FileDownloader - ${entry.name} already exists, overwriting")
+                            logger.warn("${entry.name} already exists, overwriting")
                             this.delete("$destDir${entry.name}")
                             Files.copy(input, outPath)
-                            println("FileDownloader - ${entry.name} has been overwritten")
+                            logger.info("${entry.name} has been overwritten")
                         }
                     }
                 }
@@ -65,13 +67,13 @@ class FileDownloader {
                 try {
                     try {
                         Files.delete(filePath)
-                        println("FileDownloader - Deletion of $src succeeded.")
+                        logger.info("Deletion of $src succeeded.")
                     } catch (e: IOException) {
-                        println("FileDownloader - Error while deleting $src: $e")
+                        logger.error("Error while deleting $src: $e")
                     }
                 }
                 catch (e: Exception) {
-                    println("FileDownloader - Error while deleting $src: $e")
+                    logger.error("Error while deleting $src: $e")
                 }
             }
         }

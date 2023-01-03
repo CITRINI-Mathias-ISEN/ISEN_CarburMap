@@ -5,6 +5,8 @@ import org.isen.carburmap.data.Filters
 import org.isen.carburmap.lib.routing.RoutingEngine
 import org.isen.carburmap.model.ICarburMapModel
 import org.isen.carburmap.view.ICarburMapView
+import org.isen.carburmap.model.impl.DefaultCarburmapModel.Companion.logger
+
 
 class CarburMapController(val model:ICarburMapModel) {
     private val views = mutableListOf<ICarburMapView>()
@@ -14,20 +16,17 @@ class CarburMapController(val model:ICarburMapModel) {
             it.display()
         }
         model.fetchAllCities()
-        //model.findStationByXML(lat, lon, filters)
     }
 
     fun updateData(lat: Double, lon: Double, filters: Filters) {
         if (filters.json && !filters.xml) {
-            //println("JSON")
             model.findStationByJSON(lat, lon, filters)
         }
         else if (!filters.json && filters.xml) {
-            //println("XML")
             model.findStationByXML(lat, lon, filters)
         }
         else {
-            logger().error("Erreur au niveau du saisie des filtres JSON ou XML")
+            logger.error("Error in filters selection")
         }
     }
 

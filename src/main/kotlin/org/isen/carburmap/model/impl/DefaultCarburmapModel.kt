@@ -44,19 +44,16 @@ class DefaultCarburmapModel : ICarburMapModel {
 
     private var stationsListFinal : StationsList? by Delegates.observable(null) {
             _, oldValue, newValue ->
-        logger.info("stationInformation updated")
         pcs.firePropertyChange(ICarburMapModel.DataType.Stations.toString(), oldValue, newValue)
     }
 
     private var villesList : Array<SearchData>? by Delegates.observable(null) {
             _, oldValue, newValue ->
-        logger.info("stationInformation updated")
         pcs.firePropertyChange(ICarburMapModel.DataType.VillesList.toString(), oldValue, newValue)
     }
 
     var selectedMapMarkerStation: MapMarkerStation? by Delegates.observable(null) {
             _, oldValue, newValue ->
-        logger.info("update selectedStation $newValue")
         pcs.firePropertyChange(ICarburMapModel.DataType.SelectedStation.toString(), oldValue, newValue)
     }
 
@@ -73,6 +70,7 @@ class DefaultCarburmapModel : ICarburMapModel {
      * @return the list of stations in a radius of distance from your position
      */
     override fun findStationByJSON(lat:Double, lon:Double, filters:Filters) {
+        logger.info("lat=$lat, lon=$lon, filters=$filters")
             "https://data.economie.gouv.fr//api/records/1.0/search/?dataset=prix-carburants-fichier-instantane-test-ods-copie&q=&rows=-1&geofilter.distance=$lat%2C+$lon%2C+10000"
             .httpGet()
             .responseObject(StationsListJSON.Deserializer()) { request, response, result ->
@@ -81,8 +79,9 @@ class DefaultCarburmapModel : ICarburMapModel {
                     stationsList = StationsList(data)
                     filtrage(filters)
                     stationsListFinal = stationsList
+                    logger.info("${stationsListFinal?.stations?.size} stations found")
                 } else {
-                    logger.warn("Be careful data is void $error")
+                    logger.warn("Be careful data is void")
                 }
             }
     }
@@ -95,13 +94,14 @@ class DefaultCarburmapModel : ICarburMapModel {
      */
     override fun findStationByXML(lat:Double, lon:Double, filters:Filters) {
         // Get the file from resources folder
+        logger.info("lat=$lat, lon=$lon, filters=$filters")
         val file = ClassLoader.getSystemClassLoader().getResource("./xml/PrixCarburants_instantane.xml")
         if (file == null) {
-            println("File not found")
+            logger.error("File not found")
         }
         val xml = file.readText()
         val data = kotlinXmlMapper.readValue(xml, StationsListXML::class.java)
-        if (data != null) {
+        if (data.pdv.size > 0) {
             val geoDistanceHelper = GeoDistanceHelper(lat, lon)
             data.pdv = data.pdv.filter{ geoDistanceHelper.calculate(it.latitude / 100000, it.longitude / 100000) < 10000.0 } as ArrayList<Pdv>
             stationsList = StationsList(data)
@@ -110,22 +110,32 @@ class DefaultCarburmapModel : ICarburMapModel {
         } else {
             logger.warn("Be careful data is void")
         }
+        logger.info("${stationsListFinal?.stations?.size} stations found")
     }
 
      override fun fetchAllCities() : Array<SearchData>? {
-         val content = ClassLoader.getSystemClassLoader().getResource("./cities.json")?.readText(Charsets.UTF_8)
-
-         val gson = Gson()
-         val villes = gson.fromJson(content, Array<Ville>::class.java)
-         villesList = villes.map { SearchData(id = it.id, displayName = "${it.name} (${it.zip_code})", cp = it.zip_code, lat = it.gps_lat, lon = it.gps_lng) }.toTypedArray()
-
-         //println(villesList!![0].zip_code)
+         if (villesList == null) {
+             val content = ClassLoader.getSystemClassLoader().getResource("./cities.json")?.readText(Charsets.UTF_8)
+             val gson = Gson()
+             val villes = gson.fromJson(content, Array<Ville>::class.java)
+             villesList = villes.map {
+                 SearchData(
+                     id = it.id,
+                     displayName = "${it.name} (${it.zip_code})",
+                     cp = it.zip_code,
+                     lat = it.gps_lat,
+                     lon = it.gps_lng
+                 )
+             }.toTypedArray()
+             logger.info("${villesList?.size} cities found")
+         }
          return villesList!!
 
     }
 
     override fun register(datatype:ICarburMapModel.DataType, listener:PropertyChangeListener){
         pcs.addPropertyChangeListener(datatype.toString(), listener)
+        logger.info("Event listener registered for $datatype")
     }
     override fun unregister(listener:PropertyChangeListener){
         //TODO
@@ -175,13 +185,13 @@ class DefaultCarburmapModel : ICarburMapModel {
                 st.prix!!.any { it.carburant == "GPLc"}
             } as ArrayList<Station>
         }
-        //stationsList!!.stations.forEach { println(it) }
-
+        logger.info("${stationsList!!.stations.size} matching stations found")
     }
 
     override fun newItinerary(routingEngineRes: ResponsePath) {
         val path = MapPath(routingEngineRes)
         itinerary = path
+        logger.info("New itinerary created")
     }
 
 }

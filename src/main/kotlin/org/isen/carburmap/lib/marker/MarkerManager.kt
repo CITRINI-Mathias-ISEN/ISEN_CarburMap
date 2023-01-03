@@ -14,7 +14,6 @@ class MarkerManager(var map: JMapViewer) : PropertyChangeListener {
                 val coordinate = Coordinate(it.coordonnees[0], it.coordonnees[1])
                 val markerIcon = MapMarkerIcon(coordinate, "./img/gas-station.png")
                 map.addMapMarker(markerIcon)
-                println("Station at ${it.coordonnees[0]} ${it.coordonnees[1]}")
             }
         }
     }
