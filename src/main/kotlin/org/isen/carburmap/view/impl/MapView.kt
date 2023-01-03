@@ -175,6 +175,7 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
             box.add(makeGridBagLayoutPanel("address","Addresse :" , JLabel("")))
             box.add(makeGridBagLayoutPanel("city","Ville :" , JLabel("")))
             box.add(makeGridBagLayoutPanel("cp","Code postal :" , JLabel("")))
+            box.add(makeGridBagLayoutPanel("services","Services :" , JLabel("")))
             val listPanel = JPanel(BorderLayout())
             listPanel.add(prixList)
             listPanel.isOpaque = true
@@ -240,6 +241,8 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
                 fieldComp["address"]?.text = value.station.adresse
                 fieldComp["city"]?.text = value.station.ville
                 fieldComp["cp"]?.text = value.station.cp
+                val services = value.station.services.toString().substring(1, value.station.services.toString().length - 1)
+                fieldComp["services"]?.text = if(services.isEmpty()) "Aucun" else services
                 prixList.model = DefaultListModel<Prix>().apply {
                     value.station.prix?.forEach { prix ->
                         addElement(prix)
