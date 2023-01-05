@@ -17,5 +17,5 @@ interface ICarburMapModel {
     fun changeCurrentSelection(id:Long)
     fun fetchAllCities() : Array<SearchData>?
     fun filtrage(filters: Filters, stations: StationsList)
-    fun newItinerary(routingEngineRes: ResponsePath)
+    fun newItinerary(routingEngineRes: ResponsePath, filters: Filters)
 }

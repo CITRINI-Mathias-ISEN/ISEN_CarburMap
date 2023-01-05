@@ -1,6 +1,7 @@
 package org.isen.carburmap.lib.routing
 
 import com.graphhopper.ResponsePath
+import org.isen.carburmap.data.Filters
 import org.openstreetmap.gui.jmapviewer.Coordinate
 import org.openstreetmap.gui.jmapviewer.MapObjectImpl
 import org.openstreetmap.gui.jmapviewer.interfaces.MapPolygon
@@ -10,6 +11,7 @@ import java.awt.geom.Path2D
 class MapPath(private var path : ResponsePath) : MapObjectImpl(null, null, null), MapPolygon {
     private val points = path.points.map { Coordinate(it.lat, it.lon) }
     private var isMainPoint = true
+    var filter : Filters = Filters()
     override fun getPoints(): List<Coordinate> {
         return points
     }

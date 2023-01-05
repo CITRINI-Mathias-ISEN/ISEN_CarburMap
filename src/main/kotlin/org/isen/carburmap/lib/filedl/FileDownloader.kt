@@ -19,6 +19,15 @@ class FileDownloader {
         fun download(path : String, link : String) {
             val url = URL(link)
             val filePath = Paths.get("build/resources/main/$path")
+            if(!Files.exists(filePath)) {
+                try {
+                    Files.createDirectories(filePath.parent)
+                } catch (e: IOException) {
+                    logger.error("Error while downloading file $path from $link", e)
+                }
+            } else {
+                logger.info("File $path already exists")
+            }
             this.delete("$path")
             try {
                 url.openStream().use { Files.copy(it, filePath) }

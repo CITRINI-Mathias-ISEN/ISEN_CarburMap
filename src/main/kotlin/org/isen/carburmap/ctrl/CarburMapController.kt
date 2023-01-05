@@ -46,8 +46,8 @@ class CarburMapController(val model:ICarburMapModel) {
         }
     }
 
-    fun newItinerary(startLat: Double, startLon: Double, endLat: Double, endLon: Double) {
+    fun newItinerary(startLat: Double, startLon: Double, endLat: Double, endLon: Double, filters: Filters) {
         val routingEngineRes = RoutingEngine.getInstance().getPathCar(startLat, startLon, endLat, endLon)
-        model.newItinerary(routingEngineRes)
+        model.newItinerary(routingEngineRes, filters)
     }
 }

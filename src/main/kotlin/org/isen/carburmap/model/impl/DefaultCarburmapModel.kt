@@ -21,6 +21,7 @@ import org.isen.carburmap.lib.geo.GeoDistanceHelper
 import org.isen.carburmap.lib.marker.MapMarkerStation
 import org.isen.carburmap.lib.routing.MapPath
 import org.isen.carburmap.model.ICarburMapModel
+import java.awt.EventQueue
 import java.awt.geom.*
 import java.beans.PropertyChangeListener
 import java.beans.PropertyChangeSupport
@@ -63,12 +64,14 @@ class DefaultCarburmapModel : ICarburMapModel {
     var itinerary: MapPath? by Delegates.observable(null) {
             _, oldValue, newValue ->
         val promisePool = PromisePool {
+            EventQueue.invokeLater {
                 this.logger().info("update itinerary $newValue")
                 val stationListForMerge = it.first()
                 for (st in it.subList(1, it.size)) {
                     stationListForMerge.merge(st)
                 }
                 this.stationsList = stationListForMerge
+            }
         }
         if (newValue != null) {
             for (i in 0 until newValue.points.size - 1 step 100) {
@@ -138,7 +141,7 @@ class DefaultCarburmapModel : ICarburMapModel {
 
      override fun fetchAllCities() : Array<SearchData>? {
          if (villesList == null) {
-             val content = ClassLoader.getSystemClassLoader().getResource("./cities.json")?.readText(Charsets.UTF_8)
+             val content = DefaultCarburmapModel::class.java.getResource("/cities.json")?.readText(Charsets.UTF_8)
              val gson = Gson()
              val villes = gson.fromJson(content, Array<Ville>::class.java)
              villesList = villes.map {
@@ -211,8 +214,9 @@ class DefaultCarburmapModel : ICarburMapModel {
         logger.info("${stations.stations.size} matching stations found")
     }
 
-    override fun newItinerary(routingEngineRes: ResponsePath) {
+    override fun newItinerary(routingEngineRes: ResponsePath, filters: Filters) {
         val path = MapPath(routingEngineRes)
+        path.filter = filters
         itinerary = path
         logger.info("New itinerary created")
     }
