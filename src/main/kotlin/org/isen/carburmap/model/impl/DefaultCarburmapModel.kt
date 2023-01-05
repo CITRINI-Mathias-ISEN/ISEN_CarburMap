@@ -47,6 +47,8 @@ class DefaultCarburmapModel : ICarburMapModel {
 
     private var stationsList : StationsList? = null
 
+    private var stationsListTemp: StationsList? = null
+
     private var stationsListFinal : StationsList? by Delegates.observable(null) {
             _, oldValue, newValue ->
         pcs.firePropertyChange(ICarburMapModel.DataType.Stations.toString(), oldValue, newValue)
@@ -65,7 +67,13 @@ class DefaultCarburmapModel : ICarburMapModel {
     var itinerary: MapPath? by Delegates.observable(null) {
             _, oldValue, newValue ->
         logger.info("update itinerary $newValue")
-        itinerary?.let { getPolygone(it) }
+        //itinerary?.let { getPolygone(it) }
+        if (newValue != null) {
+            for (i in 0 until newValue.points.size - 1 step 100) {
+                val p1 = newValue.points[i]
+                findStationByJSON(p1.lat, p1.lon, Filters(), true)
+            }
+        }
         pcs.firePropertyChange(ICarburMapModel.DataType.Itinerary.toString(), oldValue, newValue)
     }
 
@@ -116,10 +124,13 @@ class DefaultCarburmapModel : ICarburMapModel {
         val pathIterator = area.getPathIterator(null)
         val coords = DoubleArray(6)
         val polygon = java.awt.Polygon()
+        val x : ArrayList<Int> = ArrayList()
+        val y : ArrayList<Int> = ArrayList()
         while (!pathIterator.isDone) {
             val type = pathIterator.currentSegment(coords)
             if (type == PathIterator.SEG_LINETO || type == PathIterator.SEG_MOVETO) {
-                polygon.addPoint(coords[0].toInt(), coords[1].toInt())
+                x.add(coords[0].toInt())
+                y.add(coords[1].toInt())
             }
             pathIterator.next()
         }
@@ -131,7 +142,7 @@ class DefaultCarburmapModel : ICarburMapModel {
      * @param lon longitude of your position
      * @return the list of stations in a radius of distance from your position
      */
-    override fun findStationByJSON(lat:Double, lon:Double, filters:Filters) {
+    override fun findStationByJSON(lat:Double, lon:Double, filters:Filters, merge:Boolean) {
         logger.info("lat=$lat, lon=$lon, filters=$filters")
             "https://data.economie.gouv.fr//api/records/1.0/search/?dataset=prix-carburants-fichier-instantane-test-ods-copie&q=&rows=-1&geofilter.distance=$lat%2C+$lon%2C+10000"
             .httpGet()
@@ -140,7 +151,14 @@ class DefaultCarburmapModel : ICarburMapModel {
                 if (data != null) {
                     stationsList = StationsList(data)
                     filtrage(filters)
-                    stationsListFinal = stationsList
+                    if(stationsListFinal != null && merge) {
+                        stationsListTemp = stationsListFinal!!.copy()
+                        stationsListFinal!!.merge(stationsList!!)
+                    }
+                    else {
+                        stationsListFinal = stationsList
+                        stationsListTemp = stationsListFinal!!.copy()
+                    }
                     logger.info("${stationsListFinal?.stations?.size} stations found")
                 } else {
                     logger.warn("Be careful data is void")

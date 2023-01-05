@@ -10,7 +10,7 @@ interface ICarburMapModel {
     }
     fun register(datatype:DataType,listener:PropertyChangeListener)
     fun unregister(listener:PropertyChangeListener)
-    fun findStationByJSON(lat:Double, lon:Double, filters: Filters)
+    fun findStationByJSON(lat:Double, lon:Double, filters: Filters, merge:Boolean = false)
 
     fun findStationByXML(lat:Double, lon:Double, filters: Filters)
     fun changeCurrentSelection(id:Long)
