@@ -181,7 +181,7 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
             listPanel.isOpaque = true
             val globalBox: JPanel = JPanel().apply {
                 layout = BorderLayout()
-                add(box, BorderLayout.CENTER)
+                add(box, BorderLayout.WEST)
                 box.maximumSize = Dimension(800, 90)
                 add(listPanel, BorderLayout.SOUTH)
                 isOpaque = true
