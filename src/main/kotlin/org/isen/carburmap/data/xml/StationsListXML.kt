@@ -6,8 +6,16 @@ import com.fasterxml.jackson.annotation.JsonRootName
 @JsonRootName("pdv_liste")
 data class StationsListXML(
     @JsonProperty("pdv")
-    var pdv: ArrayList<Pdv>
-)
+    var pdv: ArrayList<Pdv>) {
+
+    fun copy(): StationsListXML {
+        val stations = StationsListXML(ArrayList<Pdv>())
+        for (pdv in this.pdv) {
+            stations.pdv.add(pdv.copy())
+        }
+        return stations
+    }
+}
 
 @JsonRootName("pdv")
 data class Pdv(

@@ -21,6 +21,7 @@ import org.isen.carburmap.lib.geo.GeoDistanceHelper
 import org.isen.carburmap.lib.marker.MapMarkerStation
 import org.isen.carburmap.lib.routing.MapPath
 import org.isen.carburmap.model.ICarburMapModel
+import org.locationtech.jts.geom.Coordinate
 import java.awt.EventQueue
 import java.awt.geom.*
 import java.beans.PropertyChangeListener
@@ -74,9 +75,13 @@ class DefaultCarburmapModel : ICarburMapModel {
             }
         }
         if (newValue != null) {
-            for (i in 0 until newValue.points.size - 1 step 100) {
-                val p1 = newValue.points[i]
-                findStationByJSON(p1.lat, p1.lon, Filters(), true, promisePool.createPromise())
+            if (itinerary?.filter?.xml == true) {
+                itinerary?.let { this.findStationByXML(newValue.points, newValue.filter) }
+            } else {
+                for (i in 0 until newValue.points.size - 1 step 100) {
+                    val p1 = newValue.points[i]
+                    findStationByJSON(p1.lat, p1.lon, Filters(), true, promisePool.createPromise())
+                }
             }
         }
         pcs.firePropertyChange(ICarburMapModel.DataType.Itinerary.toString(), oldValue, newValue)
@@ -90,7 +95,7 @@ class DefaultCarburmapModel : ICarburMapModel {
      */
     override fun findStationByJSON(lat:Double, lon:Double, filters:Filters, merge:Boolean, promise: Promise?) {
         logger.info("lat=$lat, lon=$lon, filters=$filters")
-            "https://data.economie.gouv.fr//api/records/1.0/search/?dataset=prix-carburants-fichier-instantane-test-ods-copie&q=&rows=-1&geofilter.distance=$lat%2C+$lon%2C+10000"
+            "https://data.economie.gouv.fr//api/records/1.0/search/?dataset=prix-carburants-fichier-instantane-test-ods-copie&q=&rows=-1&geofilter.distance=$lat%2C+$lon%2C+5000"
             .httpGet()
             .responseObject(StationsListJSON.Deserializer()) { request, response, result ->
                 val (data, error) = result
@@ -118,9 +123,9 @@ class DefaultCarburmapModel : ICarburMapModel {
      * @param lon longitude of your position
      * @return the list of stations in a radius of distance from your position
      */
-    override fun findStationByXML(lat:Double, lon:Double, filters:Filters) {
+    override fun findStationByXML(points: List<org.openstreetmap.gui.jmapviewer.Coordinate>, filters:Filters) {
         // Get the file from resources folder
-        logger.info("lat=$lat, lon=$lon, filters=$filters")
+        //logger.info("lat=$lat, lon=$lon, filters=$filters")
         val file = ClassLoader.getSystemClassLoader().getResource("./xml/PrixCarburants_instantane.xml")
         if (file == null) {
             logger.error("File not found")
@@ -128,15 +133,25 @@ class DefaultCarburmapModel : ICarburMapModel {
         val xml = file?.readText()
         val data = kotlinXmlMapper.readValue(xml, StationsListXML::class.java)
         if (data.pdv.size > 0) {
-            val geoDistanceHelper = GeoDistanceHelper(lat, lon)
-            data.pdv = data.pdv.filter{ geoDistanceHelper.calculate(it.latitude / 100000, it.longitude / 100000) < 10000.0 } as ArrayList<Pdv>
-            val stationsList = StationsList(data)
-            filtrage(filters, stationsList)
+            var stationsList = filterStationsXML(points[0].lat, points[0].lon, filters, data.copy())
+            if (points.size > 1) {
+                for (i in 1 until points.size step 100) {
+                    stationsList.merge(filterStationsXML(points[i].lat, points[i].lon, filters, data.copy()))
+                }
+            }
             this.stationsList = stationsList
         } else {
             logger.warn("Be careful data is void")
         }
         logger.info("${stationsList?.stations?.size} stations found")
+    }
+
+    private fun filterStationsXML(lat:Double, lon:Double, filters:Filters, data:StationsListXML) : StationsList {
+        val geoDistanceHelper = GeoDistanceHelper(lat, lon)
+        data.pdv = data.pdv.filter{ geoDistanceHelper.calculate(it.latitude / 100000, it.longitude / 100000) < 5000.0 } as ArrayList<Pdv>
+        val stationsList = StationsList(data)
+        filtrage(filters, stationsList)
+        return stationsList
     }
 
      override fun fetchAllCities() : Array<SearchData>? {

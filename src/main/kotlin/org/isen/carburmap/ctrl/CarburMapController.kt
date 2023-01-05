@@ -23,7 +23,7 @@ class CarburMapController(val model:ICarburMapModel) {
             model.findStationByJSON(lat, lon, filters)
         }
         else if (!filters.json && filters.xml) {
-            model.findStationByXML(lat, lon, filters)
+            model.findStationByXML(listOf(org.openstreetmap.gui.jmapviewer.Coordinate(lat, lon)), filters)
         }
         else {
             logger.error("Error in filters selection")
