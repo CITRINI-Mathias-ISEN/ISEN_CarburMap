@@ -9,18 +9,18 @@ import com.github.kittinunf.fuel.httpGet
 import com.google.gson.Gson
 import com.graphhopper.ResponsePath
 import org.apache.logging.log4j.kotlin.Logging
+import org.apache.logging.log4j.kotlin.logger
 import org.isen.carburmap.data.*
 import org.isen.carburmap.data.json.StationsListJSON
 import org.isen.carburmap.data.xml.Pdv
 import org.isen.carburmap.data.xml.StationsListXML
+import org.isen.carburmap.lib.event.Promise
+import org.isen.carburmap.lib.event.PromisePool
 import org.isen.carburmap.lib.filedl.FileDownloader
 import org.isen.carburmap.lib.geo.GeoDistanceHelper
 import org.isen.carburmap.lib.marker.MapMarkerStation
 import org.isen.carburmap.lib.routing.MapPath
 import org.isen.carburmap.model.ICarburMapModel
-import org.locationtech.jts.geom.Coordinate
-import org.locationtech.jts.geom.Polygon
-import org.openstreetmap.gui.jmapviewer.interfaces.MapPolygon
 import java.awt.geom.*
 import java.beans.PropertyChangeListener
 import java.beans.PropertyChangeSupport
@@ -45,11 +45,7 @@ class DefaultCarburmapModel : ICarburMapModel {
 
     private val pcs = PropertyChangeSupport(this)
 
-    private var stationsList : StationsList? = null
-
-    private var stationsListTemp: StationsList? = null
-
-    private var stationsListFinal : StationsList? by Delegates.observable(null) {
+    private var stationsList : StationsList? by Delegates.observable(null) {
             _, oldValue, newValue ->
         pcs.firePropertyChange(ICarburMapModel.DataType.Stations.toString(), oldValue, newValue)
     }
@@ -66,74 +62,21 @@ class DefaultCarburmapModel : ICarburMapModel {
 
     var itinerary: MapPath? by Delegates.observable(null) {
             _, oldValue, newValue ->
-        logger.info("update itinerary $newValue")
-        //itinerary?.let { getPolygone(it) }
+        val promisePool = PromisePool {
+                this.logger().info("update itinerary $newValue")
+                val stationListForMerge = it.first()
+                for (st in it.subList(1, it.size)) {
+                    stationListForMerge.merge(st)
+                }
+                this.stationsList = stationListForMerge
+        }
         if (newValue != null) {
             for (i in 0 until newValue.points.size - 1 step 100) {
                 val p1 = newValue.points[i]
-                findStationByJSON(p1.lat, p1.lon, Filters(), true)
+                findStationByJSON(p1.lat, p1.lon, Filters(), true, promisePool.createPromise())
             }
         }
         pcs.firePropertyChange(ICarburMapModel.DataType.Itinerary.toString(), oldValue, newValue)
-    }
-
-    fun getPolygone(path : MapPath) {
-        val points = path.points
-        // Draw a line around the path
-        val area = Area()
-        // For each 10 points, draw a line
-        for (i in 0 until points.size - 1 step 10) {
-            val point1: Point2D = Point2D.Double(points[i].lat * 100000, points[i].lon * 100000)
-            val point2: Point2D = Point2D.Double(points[i + 1].lat * 100000, points[i + 1].lon * 100000)
-            val ln = Line2D.Double(point1.getX(), point1.getY(), point2.getX(), point2.getY())
-            val indent = 15.0 // distance from central line
-            val length = ln.p1.distance(ln.p2)
-            val dx_li = (ln.getX2() - ln.getX1()) / length * indent
-            val dy_li = (ln.getY2() - ln.getY1()) / length * indent
-
-            // moved p1 point
-            val p1X = ln.getX1() - dx_li
-            val p1Y = ln.getY1() - dy_li
-
-            // line moved to the left
-            val lX1 = ln.getX1() - dy_li
-            val lY1 = ln.getY1() + dx_li
-            val lX2 = ln.getX2() - dy_li
-            val lY2 = ln.getY2() + dx_li
-
-            // moved p2 point
-            val p2X = ln.getX2() + dx_li
-            val p2Y = ln.getY2() + dy_li
-
-            // line moved to the right
-            val rX1_ = ln.getX1() + dy_li
-            val rY1 = ln.getY1() - dx_li
-            val rX2 = ln.getX2() + dy_li
-            val rY2 = ln.getY2() - dx_li
-            val p: Path2D = Path2D.Double()
-            p.moveTo(lX1, lY1)
-            p.lineTo(lX2, lY2)
-            p.lineTo(p2X, p2Y)
-            p.lineTo(rX2, rY2)
-            p.lineTo(rX1_, rY1)
-            p.lineTo(p1X, p1Y)
-            p.lineTo(lX1, lY1)
-            area.add(Area(p))
-        }
-        // Transform area to polygon
-        val pathIterator = area.getPathIterator(null)
-        val coords = DoubleArray(6)
-        val polygon = java.awt.Polygon()
-        val x : ArrayList<Int> = ArrayList()
-        val y : ArrayList<Int> = ArrayList()
-        while (!pathIterator.isDone) {
-            val type = pathIterator.currentSegment(coords)
-            if (type == PathIterator.SEG_LINETO || type == PathIterator.SEG_MOVETO) {
-                x.add(coords[0].toInt())
-                y.add(coords[1].toInt())
-            }
-            pathIterator.next()
-        }
     }
 
     /**
@@ -142,26 +85,26 @@ class DefaultCarburmapModel : ICarburMapModel {
      * @param lon longitude of your position
      * @return the list of stations in a radius of distance from your position
      */
-    override fun findStationByJSON(lat:Double, lon:Double, filters:Filters, merge:Boolean) {
+    override fun findStationByJSON(lat:Double, lon:Double, filters:Filters, merge:Boolean, promise: Promise?) {
         logger.info("lat=$lat, lon=$lon, filters=$filters")
             "https://data.economie.gouv.fr//api/records/1.0/search/?dataset=prix-carburants-fichier-instantane-test-ods-copie&q=&rows=-1&geofilter.distance=$lat%2C+$lon%2C+10000"
             .httpGet()
             .responseObject(StationsListJSON.Deserializer()) { request, response, result ->
                 val (data, error) = result
                 if (data != null) {
-                    stationsList = StationsList(data)
-                    filtrage(filters)
-                    if(stationsListFinal != null && merge) {
-                        stationsListTemp = stationsListFinal!!.copy()
-                        stationsListFinal!!.merge(stationsList!!)
+                    val stations = StationsList(data)
+                    filtrage(filters, stations)
+                    if(merge || promise != null) {
+                        promise?.result = stations
+                    } else {
+                        this.stationsList = stations
                     }
-                    else {
-                        stationsListFinal = stationsList
-                        stationsListTemp = stationsListFinal!!.copy()
-                    }
-                    logger.info("${stationsListFinal?.stations?.size} stations found")
                 } else {
+                    promise?.state = Promise.State.REJECTED
                     logger.warn("Be careful data is void")
+                    if (error != null) {
+                        logger.error(error)
+                    }
                 }
             }
     }
@@ -179,18 +122,18 @@ class DefaultCarburmapModel : ICarburMapModel {
         if (file == null) {
             logger.error("File not found")
         }
-        val xml = file.readText()
+        val xml = file?.readText()
         val data = kotlinXmlMapper.readValue(xml, StationsListXML::class.java)
         if (data.pdv.size > 0) {
             val geoDistanceHelper = GeoDistanceHelper(lat, lon)
             data.pdv = data.pdv.filter{ geoDistanceHelper.calculate(it.latitude / 100000, it.longitude / 100000) < 10000.0 } as ArrayList<Pdv>
-            stationsList = StationsList(data)
-            filtrage(filters)
-            stationsListFinal = stationsList
+            val stationsList = StationsList(data)
+            filtrage(filters, stationsList)
+            this.stationsList = stationsList
         } else {
             logger.warn("Be careful data is void")
         }
-        logger.info("${stationsListFinal?.stations?.size} stations found")
+        logger.info("${stationsList?.stations?.size} stations found")
     }
 
      override fun fetchAllCities() : Array<SearchData>? {
@@ -224,48 +167,48 @@ class DefaultCarburmapModel : ICarburMapModel {
         //TODO
     }
 
-    override fun filtrage(filters: Filters) {
+    override fun filtrage(filters: Filters, stations: StationsList) {
         if (filters.Toilet) {
-            stationsList!!.stations = stationsList!!.stations.filter { it.services!!.contains("Toilettes publiques") } as ArrayList<Station>
+            stations.stations = stations.stations.filter { it.services!!.contains("Toilettes publiques") } as ArrayList<Station>
         }
         if (filters.FoodStore) {
-            stationsList!!.stations = stationsList!!.stations.filter { it.services!!.contains("Boutique non alimentaire") } as ArrayList<Station>
+            stations.stations = stations.stations.filter { it.services!!.contains("Boutique non alimentaire") } as ArrayList<Station>
         }
         if (filters.InflationStation) {
-            stationsList!!.stations = stationsList!!.stations.filter { it.services!!.contains("Station de gonflage") } as ArrayList<Station>
+            stations.stations = stations.stations.filter { it.services!!.contains("Station de gonflage") } as ArrayList<Station>
         }
 
         if (filters.e10) {
-            stationsList!!.stations = stationsList!!.stations.filter {st ->
+            stations.stations = stations.stations.filter {st ->
                 st.prix!!.any { it.carburant == "E10"}
             } as ArrayList<Station>
         }
         if (filters.e85) {
-            stationsList!!.stations = stationsList!!.stations.filter {st ->
+            stations.stations = stations.stations.filter {st ->
                 st.prix!!.any { it.carburant == "E85"}
             } as ArrayList<Station>
         }
         if (filters.sp98) {
-            stationsList!!.stations = stationsList!!.stations.filter {st ->
+            stations.stations = stations.stations.filter {st ->
                 st.prix!!.any { it.carburant == "SP98"}
             } as ArrayList<Station>
         }
         if (filters.gazole) {
-            stationsList!!.stations = stationsList!!.stations.filter {st ->
+            stations.stations = stations.stations.filter {st ->
                 st.prix!!.any { it.carburant == "Gazole"}
             } as ArrayList<Station>
         }
         if (filters.sp95) {
-            stationsList!!.stations = stationsList!!.stations.filter {st ->
+            stations.stations = stations.stations.filter {st ->
                 st.prix!!.any { it.carburant == "SP95"}
             } as ArrayList<Station>
         }
         if (filters.gplc) {
-            stationsList!!.stations = stationsList!!.stations.filter {st ->
+            stations.stations = stations.stations.filter {st ->
                 st.prix!!.any { it.carburant == "GPLc"}
             } as ArrayList<Station>
         }
-        logger.info("${stationsList!!.stations.size} matching stations found")
+        logger.info("${stations.stations.size} matching stations found")
     }
 
     override fun newItinerary(routingEngineRes: ResponsePath) {

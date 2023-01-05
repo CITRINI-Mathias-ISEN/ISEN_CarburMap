@@ -81,7 +81,6 @@ class StationsList {
     }
 
     public fun merge(stations : StationsList) {
-
         for (station in stations.stations) {
             var stationInList : Station? = this.stations.find { it.id == station.id }
             if (stationInList == null) {
