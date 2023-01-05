@@ -71,6 +71,24 @@ class StationsList {
             }
         }
     }
+
+    constructor (stations : ArrayList<Station>) {
+        this.stations = stations
+    }
+
+    public fun copy(): StationsList {
+        return StationsList(ArrayList())
+    }
+
+    public fun merge(stations : StationsList) {
+
+        for (station in stations.stations) {
+            var stationInList : Station? = this.stations.find { it.id == station.id }
+            if (stationInList == null) {
+                this.stations.add(station)
+            }
+        }
+    }
 }
 
 data class Station(
