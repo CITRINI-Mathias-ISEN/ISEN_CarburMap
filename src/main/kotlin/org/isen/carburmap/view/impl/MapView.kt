@@ -151,6 +151,7 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
         private val focusBorder = UIManager.getBorder("Panel.focusCellHighlightBorder") ?: BorderFactory.createEmptyBorder(1, 1, 1, 1)
         private val noFocusBorder = UIManager.getBorder("List.noFocusBorder") ?: getSynthNoFocusBorder()
         private var fieldComp : HashMap<String, JLabel> = HashMap()
+        private var serviceComp : HashMap<String, JComponent> = HashMap()
         private val box: Box = Box.createVerticalBox()
         private val prixList: JList<Prix> = object : JList<Prix>() {
             override fun updateUI() {
@@ -172,28 +173,40 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
             renderer.isOpaque = true
             renderer.border = BorderFactory.createEmptyBorder(2, 0, 2, 10)
             renderer.add(icon, BorderLayout.WEST)
-            box.add(makeGridBagLayoutPanel("address","Addresse :" , JLabel("")))
-            box.add(makeGridBagLayoutPanel("city","Ville :" , JLabel("")))
-            box.add(makeGridBagLayoutPanel("cp","Code postal :" , JLabel("")))
-            box.add(makeGridBagLayoutPanel("services","Services :" , JLabel("")))
+            box.add(makeGridBagLayoutPanel("address","Addresse :"))
+            box.add(makeGridBagLayoutPanel("city","Ville :"))
+            box.add(makeGridBagLayoutPanel("cp","Code postal :"))
+            val jText = JTextArea().apply {
+                isEditable = false
+                isOpaque = false
+                border = BorderFactory.createEmptyBorder(2, 0, 1, 2)
+                lineWrap = true
+                wrapStyleWord = true
+                font = Font("Arial", Font.PLAIN, 12)
+                serviceComp["services"] = this
+            }.also {
+                box.add(it)
+            }
+            box.add(makeGridBagLayoutPanel("services","Services :", jText))
             val listPanel = JPanel(BorderLayout())
             listPanel.add(prixList)
             listPanel.isOpaque = true
             val globalBox: JPanel = JPanel().apply {
                 layout = BorderLayout()
                 add(box, BorderLayout.WEST)
-                box.maximumSize = Dimension(800, 90)
                 add(listPanel, BorderLayout.SOUTH)
                 isOpaque = true
             }
             renderer.add(globalBox, BorderLayout.CENTER)
         }
 
-        fun makeGridBagLayoutPanel(atrName : String, label: String, comp: JLabel): Component {
+        fun makeGridBagLayoutPanel(atrName : String, label: String, comp: JComponent = JLabel("")): Component {
             val c = GridBagConstraints()
             val panel = JPanel(GridBagLayout())
             val gap = 5
-            fieldComp[atrName] = comp
+            if(comp is JLabel) {
+                fieldComp[atrName] = comp
+            }
 
             c.insets = Insets(gap, gap, gap, 0)
             c.anchor = GridBagConstraints.LINE_END
@@ -202,8 +215,6 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
             c.weightx = 1.0
             c.fill = GridBagConstraints.HORIZONTAL
             panel.add(comp, c)
-            panel.maximumSize = Dimension(800, 30)
-
             return panel
         }
 
@@ -242,7 +253,7 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
                 fieldComp["city"]?.text = value.station.ville
                 fieldComp["cp"]?.text = value.station.cp
                 val services = value.station.services.toString().substring(1, value.station.services.toString().length - 1)
-                fieldComp["services"]?.text = if(services.isEmpty()) "Aucun" else services
+                (serviceComp["services"] as JTextArea).text = services.ifEmpty { "Aucun" }
                 prixList.model = DefaultListModel<Prix>().apply {
                     value.station.prix?.forEach { prix ->
                         addElement(prix)
@@ -255,9 +266,6 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
 
     class PrixListCellRenderer : ListCellRenderer<Prix> {
         private val renderer = JPanel(BorderLayout())
-        private val label = JLabel("", SwingConstants.CENTER)
-        private val focusBorder = UIManager.getBorder("List.focusCellHighlightBorder")
-        private val noFocusBorder = UIManager.getBorder("List.noFocusBorder")
         private val iconManager = IconManager.getInstance()
 
         init {
