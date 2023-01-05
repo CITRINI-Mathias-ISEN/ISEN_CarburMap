@@ -1,4 +1,4 @@
-package org.isen.carburmap.model
+package org.isen.carburmap.lib.geo
 
 import org.isen.carburmap.lib.geo.GeoDistanceHelper
 import org.junit.jupiter.api.Test
