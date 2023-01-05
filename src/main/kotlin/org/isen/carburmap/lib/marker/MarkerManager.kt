@@ -12,7 +12,7 @@ class MarkerManager(var map: JMapViewer) : PropertyChangeListener {
         synchronized(map){
             (evt.newValue as StationsList).stations.forEach {
                 val coordinate = Coordinate(it.coordonnees[0], it.coordonnees[1])
-                val markerIcon = MapMarkerIcon(coordinate, "./img/gas-station.png")
+                val markerIcon = MapMarkerIcon(coordinate, "/img/gas-station.png")
                 map.addMapMarker(markerIcon)
             }
         }

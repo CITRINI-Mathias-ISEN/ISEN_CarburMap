@@ -93,7 +93,7 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
                 }
                 if(evt.newValue != null && evt.newValue is StationsList) {
                     (evt.newValue as StationsList).stations.forEach {
-                        val markerIcon = MapMarkerStation(it, "./img/gas-station.png")
+                        val markerIcon = MapMarkerStation(it, "/img/gas-station.png")
                         map.addMapMarker(markerIcon)
                         model.addElement(markerIcon)
                     }
@@ -282,7 +282,7 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
         ): Component {
             val panel = JPanel(BorderLayout())
 
-            val image = iconManager.getSimpleIcon("./img/Gas/" + value.carburant + ".png", 32)
+            val image = iconManager.getSimpleIcon("/img/Gas/" + value.carburant + ".png", 32)
             val icon = JLabel(null as? Icon?, SwingConstants.CENTER)
             icon.icon = ImageIcon(image.image)
             icon.border = BorderFactory.createEmptyBorder(0, 0, 0, 10)

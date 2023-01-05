@@ -18,8 +18,8 @@ class IconManager private constructor() {
     }
 
     init {
-        getIcon("./img/missing.png")
-        getSimpleIcon("./img/missing.png", 32)
+        getIcon("/img/missing.png")
+        getSimpleIcon("/img/missing.png", 32)
         INSTANCE = this
     }
 
@@ -28,7 +28,7 @@ class IconManager private constructor() {
             return iconMaps[path]!!
         }
         try {
-            val bufferedImage = ClassLoader.getSystemClassLoader().getResource(path)?.let { ImageIO.read(it) }!!
+            val bufferedImage = IconManager::class.java.getResource(path)?.let { ImageIO.read(it) }!!
             val img = bufferedImage.getScaledInstance(48,48, Image.SCALE_SMOOTH)
             val smallImg = bufferedImage.getScaledInstance(32,32, Image.SCALE_SMOOTH)
             val bigImg = bufferedImage.getScaledInstance(72,72, Image.SCALE_SMOOTH)
@@ -37,7 +37,7 @@ class IconManager private constructor() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        return iconMaps["./img/missing.png"]!!
+        return iconMaps["/img/missing.png"]!!
     }
 
     fun getSimpleIcon(path: String, size: Int): SimpleIcon {
@@ -46,7 +46,7 @@ class IconManager private constructor() {
             return simpleIconMaps[path+size]!!
         }
         try {
-            val bufferedImage = ClassLoader.getSystemClassLoader().getResource(path)?.let { ImageIO.read(it) }!!
+            val bufferedImage = IconManager::class.java.getResource(path)?.let { ImageIO.read(it) }!!
             val img = bufferedImage.getScaledInstance(size,size, Image.SCALE_SMOOTH)
             val simpleIcon = SimpleIcon(path, path.split('/').last(), img, size)
             simpleIconMaps[path+size] = simpleIcon
@@ -54,6 +54,6 @@ class IconManager private constructor() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        return simpleIconMaps["./img/missing.png"+32]!!
+        return simpleIconMaps["/img/missing.png"+32]!!
     }
 }

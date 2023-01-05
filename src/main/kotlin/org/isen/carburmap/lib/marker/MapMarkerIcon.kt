@@ -10,7 +10,7 @@ import java.awt.*
 import java.awt.geom.AffineTransform
 
 
-open class MapMarkerIcon(var coord: Coordinate, imgPath : String = "./img/gas-station.png") : MapObjectImpl(null, null, null), MapMarker  {
+open class MapMarkerIcon(var coord: Coordinate, imgPath : String = "/img/gas-station.png") : MapObjectImpl(null, null, null), MapMarker  {
     var img: Icon = IconManager.getInstance().getIcon(imgPath)
         private set
     private var rotation = 0.0

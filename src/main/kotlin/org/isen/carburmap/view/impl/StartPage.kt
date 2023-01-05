@@ -189,8 +189,7 @@ class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView 
                 //rajouter retour value pair
                 val resIt = checkSearch(comboIti, itineraryPanel)
                 if(res.first && resIt.first && res.second != null && resIt.second != null){
-                    controller.newItinerary(res.second!!.lat, res.second!!.lon, resIt.second!!.lat, resIt.second!!.lon)
-                    controller.updateData(res.second!!.lat, res.second!!.lon, filters)
+                    controller.newItinerary(res.second!!.lat, res.second!!.lon, resIt.second!!.lat, resIt.second!!.lon, filters)
                 }
             } else {
                 if(res.first)

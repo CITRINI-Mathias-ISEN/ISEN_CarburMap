@@ -6,7 +6,7 @@ import org.openstreetmap.gui.jmapviewer.Coordinate
 import java.awt.Image
 import java.awt.event.MouseEvent
 
-open class MapMarkerSelect(coord: Coordinate, imgPath: String, imgSelectPath: String = "./img/gas-station-selected.png") : MapMarkerIcon(coord, imgPath) {
+open class MapMarkerSelect(coord: Coordinate, imgPath: String, imgSelectPath: String = "/img/gas-station-selected.png") : MapMarkerIcon(coord, imgPath) {
     var selectedIcon: Icon = IconManager.getInstance().getIcon(imgSelectPath)
         private set
     var isSelected : Boolean = false
