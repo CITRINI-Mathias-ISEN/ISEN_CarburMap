@@ -6,6 +6,10 @@ import com.google.gson.annotations.SerializedName
 import org.isen.carburmap.data.json.StationsListJSON
 import org.isen.carburmap.data.xml.StationsListXML
 
+/**
+ * Class including a list of stations
+ * @property stations the list of stations
+ */
 class StationsList {
     var stations : ArrayList<Station> = ArrayList<Station>()
 
@@ -76,10 +80,18 @@ class StationsList {
         this.stations = stations
     }
 
+    /**
+     * Copy the object
+     * @return a copy of the object
+     */
     public fun copy(): StationsList {
         return StationsList(ArrayList())
     }
 
+    /**
+     * Merge two stations list into one
+     * @param stationsList the stations list to merge with the current one
+     */
     public fun merge(stations : StationsList) {
         for (station in stations.stations) {
             var stationInList : Station? = this.stations.find { it.id == station.id }
@@ -90,6 +102,19 @@ class StationsList {
     }
 }
 
+/**
+ * Class representing a station
+ * @property id the id of the station
+ * @property cp the postal code of the station
+ * @property adresse the address of the station
+ * @property ville the city of the station
+ * @property automate_24_24 if the station is open 24/24
+ * @property surRoute if the station is on the road
+ * @property coordonnees the coordinates of the station
+ * @property prix the prices of each fuel
+ * @property services the services of the station
+ * @property horaires the opening hours of the station
+ */
 data class Station(
     val id: Long,
     val cp: String?=null,
@@ -103,12 +128,22 @@ data class Station(
     var horaires: Planning ? = null
 )
 
+/**
+ * Class representing the prices of a station
+ * @property carburant the name of the fuel
+ * @property valeur the price of the fuel
+ * @property maj the date of the last update
+ */
 data class Prix(
     val carburant: String?=null,
     val valeur: Double?=null,
     val maj: String?=null
 )
 
+/**
+ * Class representing the opening hours of a station
+ * @property jour the list of opening days
+ */
 data class Planning(val jour: ArrayList<Jour>) {
 
     class Deserializer : ResponseDeserializable<Planning> {
@@ -116,6 +151,12 @@ data class Planning(val jour: ArrayList<Jour>) {
     }
 }
 
+/**
+ * Class representing a day of the opening hours of a station
+ * @property id the id of the day
+ * @property nom the name of the day
+ * @property horaire the opening hours of the day
+ */
 data class Jour(
     @SerializedName("@id")
     val id: Int?= null,
@@ -123,6 +164,11 @@ data class Jour(
     val nom: String?= null,
     val horaire: Horaire)
 
+/**
+ * Class representing the opening hours of a day
+ * @property ouverture the opening time
+ * @property fermeture the closing time
+ */
 data class Horaire(
     @SerializedName("@ouverture")
     val ouverture: String? = null,

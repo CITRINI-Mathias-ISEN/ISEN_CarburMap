@@ -2,6 +2,14 @@ package org.isen.carburmap.data
 
 import org.isen.carburmap.lib.geo.GeoCodeResult
 
+/**
+ * Class representing a City
+ * @property id the id of the city
+ * @property name the name of the city
+ * @property gps_lat the latitude of the city
+ * @property gps_lng the longitude of the city
+ * @property zip_code the postal code of the city
+ */
 data class Ville(
     val id: Int,
     val name: String,
@@ -10,6 +18,16 @@ data class Ville(
     val zip_code: String,
 )
 
+/**
+ * Class representing the data in the search bar
+ * @property id the id of the place
+ * @property displayName the name of the place
+ * @property lat the latitude of the place
+ * @property lon the longitude of the place
+ * @property cp the postal code of the place
+ * @property isGeoCodeResult for the difference between a geocode and a city
+ * @property geoCodeResult the geocode result of the place
+ */
 data class SearchData(
     val id: Int = 0,
     val displayName: String,
