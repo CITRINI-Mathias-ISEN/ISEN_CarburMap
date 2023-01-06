@@ -18,6 +18,9 @@ import java.beans.PropertyChangeEvent
 import javax.swing.*
 import javax.swing.border.Border
 
+/**
+ * Class representing the map view
+ */
 class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, MouseListener {
     companion object : Logging
 
@@ -47,6 +50,9 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
         this.pack()
     }
 
+    /**
+     * Make the Graphical User Interface
+     */
     private fun makeGUI() {
         this.layout = BorderLayout()
         val jSplitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, createStationListPanel(), createStationMapPanel())
@@ -59,10 +65,16 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
         frame.iconImage = IconManager.getInstance().getSimpleIcon("/img/Carburmap.png", 64).image
     }
 
+    /**
+     * Create the panel containing the map
+     */
     private fun createStationMapPanel(): Component {
         return JScrollPane(map)
     }
 
+    /**
+     * Create the panel containing the list of stations
+     */
     private fun createStationListPanel(): JScrollPane {
         val scroll = JScrollPane(list)
         scroll.horizontalScrollBarPolicy = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
@@ -79,6 +91,10 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
         TODO("Not yet implemented")
     }
 
+    /**
+     * Update the user interface when receiving a property change event
+     * @param evt the property change event
+     */
     override fun propertyChange(evt: PropertyChangeEvent?) {
         if(evt?.propertyName == ICarburMapModel.DataType.Stations.toString()) {
             synchronized(map) {
@@ -147,6 +163,10 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
         }
     }
 
+    /**
+     * Class rendering the information of each station in the list
+     * @param controller the controller
+     */
     private class ListStationListCellRenderer(val controller: CarburMapController) : ListCellRenderer<MapMarkerStation> {
         private val renderer = JPanel(BorderLayout())
         private val icon = JLabel(null as? Icon?, SwingConstants.CENTER)
@@ -202,6 +222,12 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
             renderer.add(globalBox, BorderLayout.CENTER)
         }
 
+        /**
+         * Create the panel of the informations displayed in the list
+         * @param atrName the name of the attribute
+         * @param label the label of the attribute
+         * @param comp the component to display
+         */
         fun makeGridBagLayoutPanel(atrName : String, label: String, comp: JComponent = JLabel("")): Component {
             val c = GridBagConstraints()
             val panel = JPanel(GridBagLayout())

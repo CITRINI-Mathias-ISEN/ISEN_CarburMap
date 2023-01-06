@@ -5,6 +5,9 @@ import okhttp3.OkHttpClient
 import org.isen.carburmap.data.SearchData
 import java.util.concurrent.TimeUnit
 
+/**
+ * Class used to make a request to the GeoCode API
+ */
 class GeoCode {
     private val client = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.SECONDS)
@@ -22,6 +25,13 @@ class GeoCode {
 
 }
 
+/**
+ * Class used to parse the GeoCode API response
+ * @property place_id The place id
+ * @property lat The latitude
+ * @property lon The longitude
+ * @property display_name The display name
+ */
 class GeoCodeResult {
     var place_id: Int = 0
     var osm_type: String? = null
