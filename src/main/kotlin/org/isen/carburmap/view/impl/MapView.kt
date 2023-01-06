@@ -10,6 +10,7 @@ import org.isen.carburmap.lib.routing.MapPath
 import org.isen.carburmap.model.ICarburMapModel
 import org.isen.carburmap.model.impl.DefaultCarburmapModel
 import org.isen.carburmap.view.ICarburMapView
+import org.openstreetmap.gui.jmapviewer.Coordinate
 import org.openstreetmap.gui.jmapviewer.JMapViewer
 import java.awt.*
 import java.awt.event.MouseEvent
@@ -90,7 +91,9 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
                         if (controller.model is DefaultCarburmapModel) {
                             controller.model.selectedMapMarkerStation = null
                         }
-                        toRemove.forEach(model::removeElement)
+                        EventQueue.invokeLater {
+                            toRemove.forEach(model::removeElement)
+                        }
                     }
                 }
                 if(evt.newValue != null && evt.newValue is StationsList) {
@@ -98,6 +101,9 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
                         val markerIcon = MapMarkerStation(it, "/img/gas-station.png")
                         map.addMapMarker(markerIcon)
                         model.addElement(markerIcon)
+                        EventQueue.invokeLater {
+                            map.setDisplayToFitMapElements(true, false, true)
+                        }
                     }
                 }
             }
@@ -140,6 +146,9 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
                     evt.newValue?.let {
                         if (it is MapPath) {
                             map.addMapPolygon(it)
+                            EventQueue.invokeLater {
+                                map.setDisplayToFitMapPolygons()
+                            }
                         }
                     }
                 }
