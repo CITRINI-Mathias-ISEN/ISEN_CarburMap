@@ -15,7 +15,6 @@ interface ICarburMapModel {
     fun findStationByJSON(lat:Double, lon:Double, filters: Filters, merge:Boolean = false, promise: Promise? = null)
 
     fun findStationByXML(points: List<org.openstreetmap.gui.jmapviewer.Coordinate>, filters:Filters)
-    fun changeCurrentSelection(id:Long)
     fun fetchAllCities() : Array<SearchData>?
     fun filtrage(filters: Filters, stations: StationsList)
     fun newItinerary(routingEngineRes: ResponsePath, filters: Filters)
