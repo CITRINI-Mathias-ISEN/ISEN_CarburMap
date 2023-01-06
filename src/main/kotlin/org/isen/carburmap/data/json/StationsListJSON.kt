@@ -3,14 +3,24 @@ package org.isen.carburmap.data.json
 import com.github.kittinunf.fuel.core.ResponseDeserializable
 import com.google.gson.Gson
 
+/**
+ * Class representing a list of stations
+ * @param records the list of records associated to the stations
+ */
 data class StationsListJSON(val records:List<Record>) {
     class Deserializer : ResponseDeserializable<StationsListJSON> {
         override fun deserialize(content: String): StationsListJSON = Gson().fromJson(content, StationsListJSON::class.java)
     }
 }
 
+/**
+ * The record associated to a station
+ */
 data class Record(val fields: Fields)
 
+/**
+ * Fields of a record
+ */
 data class Fields(
     val prix_valeur:Double,
     val prix_maj: String,

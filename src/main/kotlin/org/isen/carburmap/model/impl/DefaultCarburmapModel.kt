@@ -157,10 +157,10 @@ class DefaultCarburmapModel : ICarburMapModel {
              villesList = villes.map {
                  SearchData(
                      id = it.id,
-                     displayName = "${it.name} (${it.zip_code})",
-                     cp = it.zip_code,
-                     lat = it.gps_lat,
-                     lon = it.gps_lng
+                     displayName = "${it.name} (${it.zip})",
+                     cp = it.zip,
+                     lat = it.lat,
+                     lon = it.lon
                  )
              }.toTypedArray()
              logger.info("${villesList?.size} cities found")
