@@ -21,7 +21,6 @@ import org.isen.carburmap.lib.geo.GeoDistanceHelper
 import org.isen.carburmap.lib.marker.MapMarkerStation
 import org.isen.carburmap.lib.routing.MapPath
 import org.isen.carburmap.model.ICarburMapModel
-import org.locationtech.jts.geom.Coordinate
 import java.awt.EventQueue
 import java.awt.geom.*
 import java.beans.PropertyChangeListener
@@ -87,14 +86,6 @@ class DefaultCarburmapModel : ICarburMapModel {
         pcs.firePropertyChange(ICarburMapModel.DataType.Itinerary.toString(), oldValue, newValue)
     }
 
-    /**
-     * Get the list of stations from the JSON API
-     * @param lat latitude of your position
-     * @param lon longitude of your position
-     * @param filters filters to apply
-     * @param merge if true, merge the result with the current list of stations
-     * @param promise promise to resolve when the request is done
-     */
     override fun findStationByJSON(lat:Double, lon:Double, filters:Filters, merge:Boolean, promise: Promise?) {
         logger.info("lat=$lat, lon=$lon, filters=$filters")
             "https://data.economie.gouv.fr//api/records/1.0/search/?dataset=prix-carburants-fichier-instantane-test-ods-copie&q=&rows=-1&geofilter.distance=$lat%2C+$lon%2C+5000"
@@ -103,7 +94,7 @@ class DefaultCarburmapModel : ICarburMapModel {
                 val (data, error) = result
                 if (data != null) {
                     val stations = StationsList(data)
-                    filtrage(filters, stations)
+                    filtering(filters, stations)
                     if(merge || promise != null) {
                         promise?.result = stations
                     } else {
@@ -119,11 +110,6 @@ class DefaultCarburmapModel : ICarburMapModel {
             }
     }
 
-    /**
-     * Get the list of stations from the XML API
-     * @param points list of points to use to find the stations
-     * @param filters filters to apply
-     */
     override fun findStationByXML(points: List<org.openstreetmap.gui.jmapviewer.Coordinate>, filters:Filters) {
         // Get the file from resources folder
         //logger.info("lat=$lat, lon=$lon, filters=$filters")
@@ -159,14 +145,10 @@ class DefaultCarburmapModel : ICarburMapModel {
         val geoDistanceHelper = GeoDistanceHelper(lat, lon)
         data.pdv = data.pdv.filter{ geoDistanceHelper.calculate(it.latitude / 100000, it.longitude / 100000) < 5000.0 } as ArrayList<Pdv>
         val stationsList = StationsList(data)
-        filtrage(filters, stationsList)
+        filtering(filters, stationsList)
         return stationsList
     }
 
-    /**
-     * Fetch the list of cities from the JSON file cities.json
-     * @return the list of cities
-     */
      override fun fetchAllCities() : Array<SearchData>? {
          if (villesList == null) {
              val content = DefaultCarburmapModel::class.java.getResource("/cities.json")?.readText(Charsets.UTF_8)
@@ -187,30 +169,16 @@ class DefaultCarburmapModel : ICarburMapModel {
 
     }
 
-    /**
-     * Register an event listener to the model
-     * @param datatype the type of event to listen
-     * @param listener the listener to register
-     */
     override fun register(datatype:ICarburMapModel.DataType, listener:PropertyChangeListener){
         pcs.addPropertyChangeListener(datatype.toString(), listener)
         logger.info("Event listener registered for $datatype")
     }
 
-    /**
-     * Unregister an event listener to the model
-     * @param listener the listener to unregister
-     */
     override fun unregister(listener:PropertyChangeListener){
         //TODO
     }
 
-    /**
-     * Filter the stations in the StationsList with the filters
-     * @param filters filters to apply
-     * @param stationsList StationsList to filter
-     */
-    override fun filtrage(filters: Filters, stations: StationsList) {
+    override fun filtering(filters: Filters, stations: StationsList) {
         if (filters.Toilet) {
             stations.stations = stations.stations.filter { it.services!!.contains("Toilettes publiques") } as ArrayList<Station>
         }
@@ -254,11 +222,6 @@ class DefaultCarburmapModel : ICarburMapModel {
         logger.info("${stations.stations.size} matching stations found")
     }
 
-    /**
-     * Update the itinerary
-     * @param routingEngineRes the routing engine result
-     * @param filters the filters to apply in the itinerary to filter the stations
-     */
     override fun newItinerary(routingEngineRes: ResponsePath, filters: Filters) {
         val path = MapPath(routingEngineRes)
         path.filter = filters
