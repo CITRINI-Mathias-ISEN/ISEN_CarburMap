@@ -73,6 +73,7 @@ class DefaultCarburmapModel : ICarburMapModel {
                 this.stationsList = stationListForMerge
             }
         }
+        cleanSelectedStation()
         if (newValue != null) {
             if (itinerary?.filter?.xml == true) {
                 itinerary?.let { this.findStationByXML(newValue.points, newValue.filter) }
@@ -99,6 +100,7 @@ class DefaultCarburmapModel : ICarburMapModel {
                         promise?.result = stations
                     } else {
                         this.stationsList = stations
+                        cleanItinerary()
                     }
                 } else {
                     promise?.state = Promise.State.REJECTED
@@ -125,6 +127,8 @@ class DefaultCarburmapModel : ICarburMapModel {
                 for (i in 1 until points.size step 100) {
                     stationsList.merge(filterStationsXML(points[i].lat, points[i].lon, filters, data.copy()))
                 }
+            } else {
+                cleanItinerary()
             }
             this.stationsList = stationsList
         } else {
@@ -227,6 +231,21 @@ class DefaultCarburmapModel : ICarburMapModel {
         path.filter = filters
         itinerary = path
         logger.info("New itinerary created")
+    }
+
+    private fun cleanItinerary() {
+        if(itinerary != null) {
+            itinerary = null
+            logger.info("Itinerary cleaned")
+        }
+        cleanSelectedStation()
+    }
+
+    private fun cleanSelectedStation() {
+        if(selectedMapMarkerStation != null) {
+            selectedMapMarkerStation = null
+            logger.info("Selected station cleaned")
+        }
     }
 
 }
