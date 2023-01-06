@@ -179,6 +179,9 @@ class DefaultCarburmapModel : ICarburMapModel {
     }
 
     override fun filtering(filters: Filters, stations: StationsList) {
+        if (filters.Toilet || filters.FoodStore || filters.InflationStation) {
+            stations.stations = stations.stations.filter { it.services != null } as ArrayList<Station>
+        }
         if (filters.Toilet) {
             stations.stations = stations.stations.filter { it.services!!.contains("Toilettes publiques") } as ArrayList<Station>
         }
