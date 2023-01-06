@@ -50,11 +50,13 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
     private fun makeGUI() {
         this.layout = BorderLayout()
         val jSplitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, createStationListPanel(), createStationMapPanel())
-        jSplitPane.minimumSize = Dimension(100, 100)
+        jSplitPane.resizeWeight = 0.3
+
         this.add(jSplitPane, BorderLayout.CENTER)
-        frame.setSize(1080, 720)
+        frame.setSize(1240, 720)
         frame.isVisible = true
         map.addMouseListener(this)
+        frame.iconImage = IconManager.getInstance().getSimpleIcon("/img/Carburmap.png", 64).image
     }
 
     private fun createStationMapPanel(): Component {
@@ -212,7 +214,7 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
             c.anchor = GridBagConstraints.LINE_END
             panel.add(JLabel(label), c)
 
-            c.weightx = 1.0
+            c.weightx = 2.0
             c.fill = GridBagConstraints.HORIZONTAL
             panel.add(comp, c)
             return panel

@@ -4,6 +4,7 @@ import org.isen.carburmap.ctrl.CarburMapController
 import org.isen.carburmap.data.Filters
 import org.isen.carburmap.data.SearchData
 import org.isen.carburmap.lib.geo.GeoCode
+import org.isen.carburmap.lib.icon.IconManager
 import org.isen.carburmap.view.ICarburMapView
 import org.openstreetmap.gui.jmapviewer.Coordinate
 import java.awt.*
@@ -244,6 +245,7 @@ class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView 
                 isResizable = false
                 setLocationRelativeTo(null)
                 isVisible = true
+                iconImage = IconManager.getInstance().getSimpleIcon("/img/Carburmap.png", 64).image
             }
         }
     }
