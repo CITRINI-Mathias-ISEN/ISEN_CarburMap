@@ -47,7 +47,7 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
         contentPane = this@MapView
         defaultCloseOperation = JFrame.EXIT_ON_CLOSE
         this.title = "CarburMap"
-        this.preferredSize = Dimension(900,600)
+        this.preferredSize = Dimension(1240, 720)
         this.pack()
     }
 
@@ -206,7 +206,8 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
             val jText = JTextArea().apply {
                 isEditable = false
                 isOpaque = false
-                border = BorderFactory.createEmptyBorder(2, 0, 1, 2)
+                border = BorderFactory.createEmptyBorder(2, 0, 4, 2)
+                maximumSize = Dimension(200, 200)
                 lineWrap = true
                 wrapStyleWord = true
                 font = Font("Arial", Font.PLAIN, 12)
@@ -219,8 +220,9 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
             listPanel.add(prixList)
             listPanel.isOpaque = true
             val globalBox: JPanel = JPanel().apply {
-                layout = BorderLayout()
-                add(box, BorderLayout.WEST)
+                layout = BoxLayout(this, BoxLayout.Y_AXIS)
+                add(box, BorderLayout.CENTER)
+                listPanel.minimumSize = Dimension(20, 30)
                 add(listPanel, BorderLayout.SOUTH)
                 isOpaque = true
             }
