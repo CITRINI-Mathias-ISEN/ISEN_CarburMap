@@ -57,7 +57,6 @@ class StationsList {
                 val surRoute = pdv.pop == "R"
                 val coordonnees : Array<Double> = arrayOf(pdv.latitude / 100000, pdv.longitude / 100000)
                 station = Station(id, cp, adresse, ville, automate_24_24, surRoute, coordonnees)
-                println(pdv.services)
                 this.stations.add(station)
                 val services = ArrayList<String>()
                 pdv.services?.name?.forEach { services.add(it) }
