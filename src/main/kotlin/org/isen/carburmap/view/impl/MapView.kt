@@ -140,10 +140,12 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
                         map.removeMapMarker(it)
                         it.isSelected = true
                         map.addMapMarker(it)
-                        val rectangle: Rectangle = model.indexOf(it).let { index ->
-                            list.getCellBounds(index, index)
+                        EventQueue.invokeLater {
+                            val rectangle: Rectangle = model.indexOf(it).let { index ->
+                                list.getCellBounds(index, index)
+                            }
+                            list.scrollRectToVisible(rectangle)
                         }
-                        list.scrollRectToVisible(rectangle)
                     }
                 }
             }
