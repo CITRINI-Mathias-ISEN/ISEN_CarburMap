@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2023, Kyllian SCHWEDT and/or its affiliates. All rights reserved.
- * PROPRIETARY/CONFIDENTIAL
- *
-*/
 package org.isen.carburmap.lib.event
 
 import org.apache.logging.log4j.kotlin.Logging

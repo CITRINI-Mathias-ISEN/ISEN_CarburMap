@@ -10,7 +10,6 @@ import org.isen.carburmap.lib.routing.MapPath
 import org.isen.carburmap.model.ICarburMapModel
 import org.isen.carburmap.model.impl.DefaultCarburmapModel
 import org.isen.carburmap.view.ICarburMapView
-import org.openstreetmap.gui.jmapviewer.Coordinate
 import org.openstreetmap.gui.jmapviewer.JMapViewer
 import java.awt.*
 import java.awt.event.MouseEvent

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule
 import com.fasterxml.jackson.dataformat.xml.XmlMapper
+import com.fasterxml.jackson.module.kotlin.jacksonMapperBuilder
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.github.kittinunf.fuel.httpGet
 import com.google.gson.Gson
@@ -30,8 +31,8 @@ import kotlin.properties.Delegates
 
 internal val kotlinXmlMapper = XmlMapper(JacksonXmlModule().apply {
     setDefaultUseWrapper(false)
+    jacksonMapperBuilder().configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
 }).registerKotlinModule()
-    .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
 class DefaultCarburmapModel : ICarburMapModel {
@@ -115,7 +116,7 @@ class DefaultCarburmapModel : ICarburMapModel {
     override fun findStationByXML(points: List<org.openstreetmap.gui.jmapviewer.Coordinate>, filters:Filters) {
         // Get the file from resources folder
         //logger.info("lat=$lat, lon=$lon, filters=$filters")
-        val file = ClassLoader.getSystemClassLoader().getResource("./xml/PrixCarburants_instantane.xml")
+        val file = DefaultCarburmapModel::class.java.getResource("/xml/PrixCarburants_instantane.xml")
         if (file == null) {
             logger.error("File not found")
         }
