@@ -80,7 +80,7 @@ class DefaultCarburmapModel : ICarburMapModel {
             } else {
                 for (i in 0 until newValue.points.size - 1 step 100) {
                     val p1 = newValue.points[i]
-                    findStationByJSON(p1.lat, p1.lon, Filters(), true, promisePool.createPromise())
+                    findStationByJSON(p1.lat, p1.lon, newValue.filter, true, promisePool.createPromise())
                 }
             }
         }
