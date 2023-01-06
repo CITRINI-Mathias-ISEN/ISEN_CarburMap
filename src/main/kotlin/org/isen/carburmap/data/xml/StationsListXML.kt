@@ -3,10 +3,6 @@ package org.isen.carburmap.data.xml
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonRootName
 
-/**
- * Class representing a list of stations
- * @property pdv the list of records associated to the stations
- */
 @JsonRootName("pdv_liste")
 data class StationsListXML(
     @JsonProperty("pdv")
@@ -23,16 +19,16 @@ data class StationsListXML(
 
 /**
  * This class represents a station ( pdv stands for "point de vente" in French )
- * @property id the id of the station
- * @property adresse the address of the station
- * @property cp the postal code of the station
- * @property ville the city of the station
- * @property latitude the latitude of the station
- * @property longitude the longitude of the station
- * @property horaires the opening hours of the station
- * @property prix the prices of each fuel
- * @property services the services of the station
- * @property pop place of purchase (A = Autoroute, R = Route, I = Interieur)
+ * @param id the id of the station
+ * @param adresse the address of the station
+ * @param cp the postal code of the station
+ * @param ville the city of the station
+ * @param latitude the latitude of the station
+ * @param longitude the longitude of the station
+ * @param horaires the opening hours of the station
+ * @param prix the prices of each fuel
+ * @param services the services of the station
+ * @param pop place of purchase (A = Autoroute, R = Route, I = Interieur)
  */
 @JsonRootName("pdv")
 data class Pdv(
@@ -52,7 +48,7 @@ data class Pdv(
     @set:JsonProperty("ville")
     var ville: String,
     @set:JsonProperty("services")
-    var services: List<Service> = ArrayList(),
+    var services: Services ? = null,
     @set:JsonProperty("prix")
     var prix: List<Prix> = ArrayList(),
     @set:JsonProperty("horaires")
@@ -60,12 +56,12 @@ data class Pdv(
 )
 
 /**
- * This class represents a service
- * @property nom the name of the service
+ * This class represents a set of services
+ * @param service the name of the service
  */
-data class Service(
-    @JsonProperty("service")
-    var nom: String ?= null
+data class Services(
+    @set:JsonProperty("service")
+    var name: ArrayList<String> = ArrayList()
 )
 
 /**
@@ -88,8 +84,8 @@ data class Prix(
 
 /**
  * This class represents the opening hours of a station
- * @property automates_24_24 represents if the station is open 24/24
- * @property horaires the opening hours of the station for each day
+ * @param automates_24_24 represents if the station is open 24/24
+ * @param horaires the opening hours of the station for each day
  */
 data class Horaires(
     @JsonProperty("automate-24-24")
@@ -100,10 +96,9 @@ data class Horaires(
 
 /**
  * This class represents the opening hours of a station for a specific day
- * @property id the id of the day
- * @property nom the name of the day
- * @property fermes represents if the station is closed on this day
- * @property horaires the opening hours of the station on this day
+ * @param id the id of the day
+ * @param nom the name of the day
+ * @param horaires the opening hours of the station for the day
  */
 data class Jour(
     @set:JsonProperty("id")
@@ -118,8 +113,8 @@ data class Jour(
 
 /**
  * This class represents the opening hours of a station for a specific day
- * @property debut the opening time of the station
- * @property fin the closing time of the station
+ * @param debut the opening time of the station
+ * @param fin the closing time of the station
  */
 data class Horaire(
     @set:JsonProperty("ouverture")

@@ -57,9 +57,10 @@ class StationsList {
                 val surRoute = pdv.pop == "R"
                 val coordonnees : Array<Double> = arrayOf(pdv.latitude / 100000, pdv.longitude / 100000)
                 station = Station(id, cp, adresse, ville, automate_24_24, surRoute, coordonnees)
+                println(pdv.services)
                 this.stations.add(station)
                 val services = ArrayList<String>()
-                pdv.services.forEach { if (it.nom != null) services.add(it.nom!!) }
+                pdv.services?.name?.forEach { services.add(it) }
                 station.services = services
                 if (pdv.horaires != null) {
                     for (jour in pdv.horaires?.jours!!) {
@@ -67,7 +68,7 @@ class StationsList {
                         station.horaires?.jour?.add(Jour(jour.id, jour.nom, horaire))
                     }
                 }
-                for (prix in pdv.prix) {
+                for (prix in pdv.prix!!) {
                     if (station.prix?.find { it.carburant == prix.carburant } == null) {
                         station.prix?.add(Prix(prix.carburant, prix.valeur, prix.maj))
                     }
