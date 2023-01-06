@@ -6,16 +6,16 @@ import org.isen.carburmap.lib.geo.GeoCodeResult
  * Class representing a City
  * @property id the id of the city
  * @property name the name of the city
- * @property lat the latitude of the city
- * @property lon the longitude of the city
- * @property zip the postal code of the city
+ * @property gps_lat the latitude of the city
+ * @property gps_lng the longitude of the city
+ * @property zip_code the postal code of the city
  */
 data class Ville(
     val id: Int,
     val name: String,
-    val lat: Double,
-    val lon: Double,
-    val zip: String,
+    val gps_lat: Double,
+    val gps_lng: Double,
+    val zip_code: String,
 )
 
 /**
