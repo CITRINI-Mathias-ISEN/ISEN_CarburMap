@@ -89,7 +89,7 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
     }
 
     override fun close() {
-        TODO("Not yet implemented")
+        frame.dispose()
     }
 
     /**

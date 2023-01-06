@@ -14,6 +14,8 @@ import java.beans.PropertyChangeEvent
 import javax.swing.*
 
 class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView {
+    private val frame= JFrame("CarburMap")
+
     // Search
     private val model = controller.model
     private val allCitiesArray: Array<SearchData>? = model.fetchAllCities()!!
@@ -238,7 +240,7 @@ class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView 
 
     override fun display() {
         EventQueue.invokeLater {
-            JFrame().apply {
+            frame.apply {
                 defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE
                 contentPane.add(makeUI())
                 pack()
@@ -251,7 +253,7 @@ class StartPage(var controller: CarburMapController) : JPanel(), ICarburMapView 
     }
 
     override fun close() {
-        TODO("Not yet implemented")
+        frame.dispose()
     }
 
     override fun propertyChange(evt: PropertyChangeEvent?) {}

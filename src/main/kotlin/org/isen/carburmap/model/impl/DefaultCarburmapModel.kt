@@ -179,7 +179,7 @@ class DefaultCarburmapModel : ICarburMapModel {
     }
 
     override fun unregister(listener:PropertyChangeListener){
-        //TODO
+        pcs.removePropertyChangeListener(listener)
     }
 
     override fun filtering(filters: Filters, stations: StationsList) {
