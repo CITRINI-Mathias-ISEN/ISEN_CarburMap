@@ -44,7 +44,5 @@ class MapPath(private var path : ResponsePath) : MapObjectImpl(null, null, null)
         }
     }
 
-    override fun paint(g: Graphics?, polygon: Polygon?) {
-        TODO("Not yet implemented")
-    }
+    override fun paint(g: Graphics?, polygon: Polygon?) {}
 }

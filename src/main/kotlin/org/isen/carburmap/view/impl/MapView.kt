@@ -89,7 +89,7 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
     }
 
     override fun close() {
-        TODO("Not yet implemented")
+        frame.dispose()
     }
 
     /**
@@ -104,23 +104,17 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
                         val toRemove = map.mapMarkerList.filter { (it is MapMarkerStation) && (it.station == station) }
                         map.mapMarkerList.removeAll(toRemove.toSet())
                         map.repaint()
-                        if (controller.model is DefaultCarburmapModel) {
-                            controller.model.selectedMapMarkerStation = null
-                        }
-                        EventQueue.invokeLater {
-                            toRemove.forEach(model::removeElement)
-                        }
+                        model.clear()
                     }
                 }
                 if(evt.newValue != null && evt.newValue is StationsList) {
-                    (evt.newValue as StationsList).stations.forEach {
-                        val markerIcon = MapMarkerStation(it, "/img/gas-station.png")
-                        map.addMapMarker(markerIcon)
-                        model.addElement(markerIcon)
-                        EventQueue.invokeLater {
-                            map.setDisplayToFitMapElements(true, false, true)
-                        }
+                    val listMarker = (evt.newValue as StationsList).stations.map { MapMarkerStation(it, "/img/gas-station.png")}
+                    model.addAll(listMarker)
+                    EventQueue.invokeLater {
+                        listMarker.forEach { map.addMapMarker(it) }
+                        map.setDisplayToFitMapElements(true, false, true)
                     }
+
                 }
             }
         }
