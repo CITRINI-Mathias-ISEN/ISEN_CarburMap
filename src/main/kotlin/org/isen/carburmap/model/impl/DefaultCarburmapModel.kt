@@ -89,7 +89,7 @@ class DefaultCarburmapModel : ICarburMapModel {
 
     override fun findStationByJSON(lat:Double, lon:Double, filters:Filters, merge:Boolean, promise: Promise?) {
         logger.info("lat=$lat, lon=$lon, filters=$filters")
-            "https://data.economie.gouv.fr//api/records/1.0/search/?dataset=prix-carburants-fichier-instantane-test-ods-copie&q=&rows=-1&geofilter.distance=$lat%2C+$lon%2C+5000"
+            "https://data.economie.gouv.fr//api/records/1.0/search/?dataset=prix-carburants-fichier-instantane-test-ods-copie&q=&rows=-1&geofilter.distance=$lat%2C+$lon%2C+4000"
             .httpGet()
             .responseObject(StationsListJSON.Deserializer()) { request, response, result ->
                 val (data, error) = result
@@ -147,7 +147,7 @@ class DefaultCarburmapModel : ICarburMapModel {
      */
     private fun filterStationsXML(lat:Double, lon:Double, filters:Filters, data:StationsListXML) : StationsList {
         val geoDistanceHelper = GeoDistanceHelper(lat, lon)
-        data.pdv = data.pdv.filter{ geoDistanceHelper.calculate(it.latitude / 100000, it.longitude / 100000) < 5000.0 } as ArrayList<Pdv>
+        data.pdv = data.pdv.filter{ geoDistanceHelper.calculate(it.latitude / 100000, it.longitude / 100000) < 4000.0 } as ArrayList<Pdv>
         val stationsList = StationsList(data)
         filtering(filters, stationsList)
         return stationsList
