@@ -101,7 +101,7 @@ class MapView(val controller: CarburMapController) : JPanel(), ICarburMapView, M
             synchronized(map) {
                 if(evt.oldValue != null && evt.oldValue is StationsList) {
                     (evt.oldValue as StationsList).stations.forEach { station ->
-                        val toRemove = map.mapMarkerList.filter { (it is MapMarkerStation) && (it.station == station) }
+                        val toRemove = map.mapMarkerList.filter { (it is MapMarkerStation) }
                         map.mapMarkerList.removeAll(toRemove.toSet())
                         map.repaint()
                         model.clear()
